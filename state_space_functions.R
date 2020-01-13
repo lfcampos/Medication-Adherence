@@ -159,13 +159,13 @@ mu_T = function(T, x, c_t, rho, phi, sig.nu, sig.BP, sig0, beta){
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 simulate.SS_2D = function(rho = NULL, phi = NULL, Sigma.nu = NULL, Sigma.BP = NULL, Sigma.0 = NULL, T = NULL, beta = NULL, c_t = NULL, n.obs = NULL, I.y = NULL){	
-
+  
 	# simulate adherence measures
 	if(is.null(c_t)) c_t = matrix(2*rbinom(T, 1, 0.5) - 1, T, 1)
 	
 	# Make binary x vector the length of beta with intercept
 	x = c(1, sample(c(0, 1), nrow(beta) - 1, replace = TRUE))
-	# caluclate complete mean vector
+	# calculate complete mean vector
 	mu1 = mu_T(T, x, c_t, rho[1], phi[1], Sigma.nu[1,1], Sigma.BP[1,1], Sigma.0[1,1], beta[,1])
 	mu2 = mu_T(T, x, c_t, rho[2], phi[2], Sigma.nu[2,2], Sigma.BP[2,2], Sigma.0[2,2], beta[,2])
 
@@ -173,7 +173,6 @@ simulate.SS_2D = function(rho = NULL, phi = NULL, Sigma.nu = NULL, Sigma.BP = NU
 	Sigma1 = Sigma_T(T, rho[1], phi[1], Sigma.nu[1,1], Sigma.BP[1,1], Sigma.0[1,1], beta[,1])
 	Sigma2 = Sigma_T(T, rho[2], phi[2], Sigma.nu[2,2], Sigma.BP[2,2], Sigma.0[2,2], beta[,2])
 	Sigma12 = diag(Sigma.BP[1,2], nrow = T)
-
 
 	mu = c(mu1, mu2)
 	Sigma = rbind(cbind(Sigma1, Sigma12), cbind(Sigma12, Sigma2))
@@ -187,9 +186,11 @@ simulate.SS_2D = function(rho = NULL, phi = NULL, Sigma.nu = NULL, Sigma.BP = NU
 	# simulate which to keep
 	if(is.null(n.obs)) n.obs = T
 	if(is.null(I.y)) I.y = sort(c(1, sample(2:T, n.obs-1)))
+	
+	# missing values: for now, no missingngess
+	missing = rep(0, T)
 
-
-	return(list(T = T, c_t = c_t, y1 = y1, y2 = y2, x = x, I.y = I.y))
+	return(list(T = T, c_t = c_t, y1 = y1, y2 = y2, x = x, I.y = I.y, missing = missing))
 }
 
 
