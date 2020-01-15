@@ -1,7 +1,11 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # File Name          : functions_pf.R
-# Programmer Name    : Kristen Hunter
+# Programmer Name    : Pierre Jacob
+#                      with edits by Kristen Hunter
 #                      kristenbhunter@gmail.com
+# 
+# Source             : CoupledCPF repo by pierrejacob
+#                    : https://github.com/pierrejacob/CoupledCPF
 # 
 # Last Updated       : Jan 2020
 #

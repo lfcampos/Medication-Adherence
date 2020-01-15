@@ -34,4 +34,8 @@ The other files for predicting adherence behavior are:
 - plots.R
 - ran_ef.stan
 
+# References
+
+Particle filter code in functions_pf.R is from the [CoupledCPF](https://github.com/pierrejacob/CoupledCPF) repo by pierrejacob.
+
 
