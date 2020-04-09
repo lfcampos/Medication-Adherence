@@ -1,6 +1,12 @@
 # Introduction
 
-This repository contains code needed to analyze data as in https://arxiv.org/abs/1811.11072v1.
+This repository contains code needed to analyze data as in the following two papers:
+
+'Measuring Effects of Medication Adherence on Time-Varying Health Outcome'
+https://academic.oup.com/biostatistics/advance-article-abstract/doi/10.1093/biostatistics/kxz059/5687018
+
+'Inferring medication adherence from time-varying health outcomes'
+URL TBD.
 
 # Inference on model parameters
 
@@ -16,7 +22,7 @@ The other files for inference on the model parameters are:
 
 # Predicting adherence
 
-For inference on adherence behavior, the files are in the 'predict' folder.
+To run the analysis in 'Inferring medication adherence from time-varying health outcomes', the files are in the 'predict' folder.
 
 The main file is predict.R. Sourcing this file will read in the data and posterior draws of the model parameters from the 'data' folder, produce posterior draws of adherence values, and save them in a folder with the timestamp of the runtime in the 'out' folder.
 

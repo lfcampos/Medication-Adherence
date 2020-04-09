@@ -13,11 +13,8 @@
 # install missing packages
 list.of.packages = c(
   'abind', 'bayesm', 'devtools', 'ggplot2', 
-  # 'grid', 'gridExtra', 'Hmisc',
   'knitr', 
-  #'mvtnorm', 'msm',
   'parallel', 'plyr', 'Rcpp', 'reshape2', 
-  #'rlist',
   'rstan', 'sqldf', 'wesanderson'
 )
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,'Package'])]
@@ -27,16 +24,11 @@ library(abind)
 library(bayesm)
 library(devtools)
 library(ggplot2)
-# library(grid)
-# library(gridExtra)
-# library(Hmisc)
 library(knitr)
-# library(mvtnorm)
 library(parallel)
 library(plyr)
 library(Rcpp)
 library(reshape2)
-# library(rlist)
 library(rstan)
 library(sqldf)
 library(wesanderson)
