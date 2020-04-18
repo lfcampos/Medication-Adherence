@@ -2,23 +2,22 @@
 
 This repository contains code needed to analyze data as in the following two papers:
 
-'Measuring Effects of Medication Adherence on Time-Varying Health Outcome'
-https://academic.oup.com/biostatistics/advance-article-abstract/doi/10.1093/biostatistics/kxz059/5687018
+- Luis F Campos, Mark E Glickman, Kristen B Hunter, [_Measuring effects of medication adherence on time-varying health outcomes using Bayesian dynamic linear models_](https://doi.org/10.1093/biostatistics/kxz059), **Biostatistics** 
 
-'Inferring medication adherence from time-varying health outcomes'
+- _Inferring medication adherence from time-varying health outcomes_
 URL TBD.
 
 # Inference on model parameters
 
-To run the analysis in 'Measuring Effects of Medication Adherence on Time-Varying Health Outcome', the main file is run_analysis.R. Sourcing this file will generate a simulated dataset and produce posterior draws of the state space model and save them out in a folder called 'data'.
+To run the analysis in _Measuring Effects of Medication Adherence on Time-Varying Health Outcome_, the files are in the 'infer' folder the main file is `run_analysis.R`. Sourcing this file will generate a simulated dataset and produce posterior draws of the state space model and save them out in a folder called `data`.
 
 Before running this file, change the code to point to the proper working directory.
 
 The other files for inference on the model parameters are:
 
-- stan_functions.R
-- state_space_functions.R
-- state_space_adherence.stan
+- `stan_functions.R`
+- `state_space_functions.R`
+- `state_space_adherence.stan`
 
 # Predicting adherence
 
