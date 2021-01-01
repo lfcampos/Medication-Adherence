@@ -29,7 +29,7 @@ Before running this file, change the code to point to the proper working directo
 
 The file run_params.R allows the user to easily adjust the tuning parameters, such as the number of particles or the number of test patients.
 
-After running predict.R, the user should run summarize.R. At the top of the file, the user provides the specific analysis run date of interest and summarizes the posterior draws in plots.
+After running predict.R, the script summarize.R summarizes the results, producing figures and tables. At the top of the file, the user provides the specific analysis run date of interest.
 
 The other files for predicting adherence behavior are:
 
