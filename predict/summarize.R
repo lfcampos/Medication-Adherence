@@ -3,7 +3,7 @@
 # Programmer Name    : Kristen Hunter
 #                      kristenbhunter@gmail.com
 # 
-# Last Updated       : Jan 2020
+# Last Updated       : Jan 2021
 #
 # Purpose            : Functions to summarize output and produce plots in paper
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -11,10 +11,10 @@
 ################################################
 # CHANGE THIS to output directory to be summarized
 ################################################
-run.date = '20200110_16'
+run.date = '20210101_16'
 
 # setup
-base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
+base.dir = '/Users/khunter/Dropbox/archive/Medication-Adherence/'
 predict.dir = paste(base.dir, 'predict/', sep = '')
 run.dir = paste(predict.dir, 'out/run_', run.date, '/', sep = '')
 
@@ -73,9 +73,19 @@ summarize.adherence = function(ad.means, ad.prior, run.params)
   print(interval.plot.ad.50)
   dev.off()
   
+  # summarize performance
+  interval.summary = data.frame(
+    expected.coverage = c('95', '80', '50'),
+    actual.coverage = c(mean(ad.quantiles$cover.95), mean(ad.quantiles$cover.80), mean(ad.quantiles$cover.50)),
+    mean.width = c(mean(ad.quantiles$width.95), mean(ad.quantiles$width.80), mean(ad.quantiles$width.50)),
+    max.width = c(max(ad.quantiles$width.95), max(ad.quantiles$width.80), max(ad.quantiles$width.50))
+  )
+  
   # save out data
   ad.quantile.file = paste(run.dir, 'ad_quantiles.csv', sep = '')
   write.csv(ad.quantiles, file = ad.quantile.file)
+  
+  return(interval.summary)
 }
 
 # get params
@@ -86,13 +96,51 @@ source(paste(predict.dir, 'functions.R', sep = ''))
 source(paste(predict.dir, 'plots.R', sep = ''))
 source(paste(predict.dir, 'setup.R', sep = ''))
 
-# read and concantenate in all the data
-ad.means = NULL
-ad.prior = NULL
-for(i in 1:run.params[['imputations']])
+# read and concatenate in all the data
+draws = readRDS(file = paste(run.dir, 'draws.rds', sep = ''))
+ad.means = draws[['ad.means']]
+ad.prior = draws[['ad.prior']]
+interval.summary = summarize.adherence(ad.means, ad.prior, sim.params)
+print(interval.summary)
+
+# produce table summary of adherence model
+summarize.theta.a = function(theta.a, param_titles)
 {
-  draws = readRDS(file = paste(run.dir, 'draws_', i, '.rds', sep = ''))
-  ad.means = cbind(ad.means, draws[['ad.means']])
-  ad.prior = cbind(ad.prior, draws[['ad.prior']])
+  fixef.summary = cbind(
+    apply(theta.a$fixef, 2, mean),
+    apply(theta.a$fixef, 2, quantile, probs = 0.025),
+    apply(theta.a$fixef, 2, quantile, probs = 0.975)
+  )
+  ranef.sd.summary = c(mean(theta.a$ranef.sd), quantile(theta.a$ranef.sd, 0.025), quantile(theta.a$ranef.sd, 0.975))
+  alpha.summary = c(mean(theta.a$alpha.new), quantile(theta.a$alpha.new, 0.025), quantile(theta.a$alpha.new, 0.975))
+  theta_summary = data.frame(rbind(fixef.summary, ranef.sd.summary, alpha.summary))
+  colnames(theta_summary) = c('mean', 'quantile1', 'quantile2')
+  theta_summary$parameter = rownames(theta_summary)
+  
+  if(!is.null(param_titles))
+  {
+    add.titles.query = "
+    SELECT 
+      param_titles.nice AS parameter, theta_summary.mean,
+      theta_summary.quantile1, theta_summary.quantile2
+    FROM
+      theta_summary
+    LEFT JOIN
+      param_titles ON theta_summary.parameter = param_titles.orig
+    "
+    theta_summary = sqldf(add.titles.query)
+  }
+  return(theta_summary)
 }
-summarize.adherence(ad.means, ad.prior, run.params)
+
+load(paste0(run.dir, 'theta_a.RData'))
+# maps out original variable names to "nice" ones you may want to print in a table
+param_titles = data.frame(
+  orig = c(
+    'intercept', 'gender', 'ranef.sd.summary', 'alpha.summary'
+  ),
+  nice = c(
+    'Intercept', 'Male', 'Random effect standard deviation', 'Alpha'
+  ))
+theta.a.summary = summarize.theta.a(theta.a, param_titles)
+print(theta.a.summary)

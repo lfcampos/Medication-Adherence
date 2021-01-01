@@ -3,7 +3,7 @@
 # Programmer Name    : Kristen Hunter
 #                      kristenbhunter@gmail.com
 # 
-# Last Updated       : Jan 2020
+# Last Updated       : Jan 2021
 #
 # Purpose            : General setup, including installing packages, loading
 #                      in data, formatting data, etc.
@@ -61,10 +61,10 @@ base.setup = function(base.dir)
   
   # save out run parameters
   save(run.params, file = paste(run.dir, 'run_params_', run, '.Rdata', sep = ''))
-
+  
   # also save out version of stan file for future reference
   file.copy(from = paste(predict.dir, 'ran_ef.stan', sep = ''),
-              to = paste(run.dir, 'ran_ef.stan', sep = ''))
+            to = paste(run.dir, 'ran_ef.stan', sep = ''))
   
   return(run.dir)
 }
@@ -83,7 +83,7 @@ data.setup = function(base.dir)
   dimnames(theta.h$beta) = list('iterations' = seq(1, dim(theta.h$beta)[1]),
                                 'covariates' = c('intercept', covariate.cols),
                                 'blood pressure' = c('sbp', 'dbp'))
-
+  
   # preprocess data into useful formats
   output = setup.data(run.params, theta.h, dat, covariate.cols)
   datasets = output[['datasets']]
@@ -163,7 +163,7 @@ process.data.lc = function(dat, covariate.cols)
       cov.matrix,
       sbp = sbp,
       dbp = dbp,
-      missing = x[[i]]$missing
+      missing = is.na(x[[i]]$c_t)
     )
     colnames(matrix.row) = c(
       'id', 'mday', 'adhere', 'intercept', covariate.cols, 'sbp', 'dbp', 'missing'
@@ -173,41 +173,6 @@ process.data.lc = function(dat, covariate.cols)
   }, x = dat))
   
   return(data)
-}
-
-#################################
-# Impute Missing Adherence data
-# written by LC
-#################################
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Impute Missing Adherence Data
-#   Beta-Bernoulli Imputation
-#	theta ~ Beta(1, 1)
-#	c_t|theta ~ Bern(theta)
-#   =>
-#	theta*|{c_t}_obs ~ Beta(n1+1, n0+1)
-#	{c_t}_mis ~ Bern(theta*)
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-dat_rand_adh_imp.lc = function(dat)
-{
-  imputed.data = lapply(dat, function(x){
-    # keep track of which adherence was missing
-    x$missing = rep(FALSE, length(x$c_t))
-    x$missing[is.na(x$c_t)] = TRUE
-    # impute missing values
-    if(sum(is.na(x$c_t)) > 0){
-      t1 = sum(x$c_t > 0, na.rm = TRUE)
-      t2 = sum(x$c_t < 0, na.rm = TRUE)
-      # sample rate 
-      theta = rbeta(1, t1 + 1, t2 + 1)
-      need.rep = is.na(x$c_t)
-      # sample adherence
-      x$c_t[need.rep] = 2*rbinom(sum(need.rep), 1, theta) - 1
-    }
-    x
-  })
-  return(imputed.data)
 }
 
 #################################
@@ -260,9 +225,8 @@ save.theta = function(theta.a, theta.h, run.params)
 
 setup.data = function(run.params, theta.h, dat, covariate.cols)
 {
-  # impute missing adherence values
-  dat.imputed = dat_rand_adh_imp.lc(dat)
-  data = process.data.lc(dat.imputed, covariate.cols)
+  # process data into right format
+  data = process.data.lc(dat, covariate.cols)
   
   # data processing
   datasets = preprocess.data(data, covariate.cols)
