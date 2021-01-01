@@ -3,7 +3,7 @@
 # Programmer Name    : Kristen Hunter
 #                      kristenbhunter@gmail.com
 #
-# Last Updated       : Jan 2020
+# Last Updated       : Jan 2021
 #
 # Purpose            : An example data anlaysis to predict adherence values using
 #                      simulated data
@@ -20,7 +20,7 @@
 ########################################################
 # CHANGE THIS to github repo directory
 ########################################################
-base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
+base.dir = '/Users/khunter/Dropbox/archive/Medication-Adherence/'
 
 # source necessary files
 predict.dir = paste(base.dir, 'predict/', sep = '')
@@ -50,7 +50,7 @@ predict.adherence = function()
   theta.a = theta.a.model[['theta.a']]
   save(theta.a, file = paste(run.dir, 'theta_a.RData', sep = ''))
   theta = save.theta(theta.a, theta.h, run.params)
-
+  
   ################################################
   # predictions of adherence
   ################################################
@@ -80,11 +80,6 @@ predict.adherence = function()
 ################################################
 # generate predicted values
 ################################################
-impute.draws = predict.adherence()
-
-# extract which imputation number if parallelizing across imputations
-impute.index = as.numeric(as.character(Sys.getenv("INDEX_VAR")))
-if(is.na(impute.index)){ impute.index = 1 }
-
+draws = predict.adherence()
 # save out data
-saveRDS(impute.draws, file = paste(run.dir, 'draws_', impute.index, '.rds', sep = ''))
+saveRDS(draws, file = paste(run.dir, 'draws.rds', sep = ''))
