@@ -70,7 +70,7 @@ base.setup = function(base.dir)
 }
 
 # loads in and sets up data
-setup.all = function(base.dir)
+setup.all = function(base.dir, onestep = FALSE)
 {
   data.dir = paste(base.dir, 'data/', sep = '')
 
@@ -78,10 +78,17 @@ setup.all = function(base.dir)
   # theta h = blood pressure model, provided by previous analysis
   dat = readRDS(paste0(data.dir, 'dat.RDS'))
   covariate.cols = readRDS(paste0(data.dir, 'covariate_cols.RDS'))
-  theta.h = readRDS(paste0(data.dir, 'stan_fit.RDS'))
-  dimnames(theta.h$beta) = list('iterations' = seq(1, dim(theta.h$beta)[1]),
-                                'covariates' = c('intercept', covariate.cols),
-                                'blood pressure' = c('sbp', 'dbp'))
+
+  if(!onestep)
+  {
+    theta.h = readRDS(paste0(data.dir, 'stan_fit.RDS'))
+    dimnames(theta.h$beta) = list('iterations' = seq(1, dim(theta.h$beta)[1]),
+                                  'covariates' = c('intercept', covariate.cols),
+                                  'blood pressure' = c('sbp', 'dbp'))
+  } else
+  {
+    theta.h = NULL
+  }
 
   # preprocess data into useful formats
   output = setup.data(run.params = run.params, dat = dat, covariate.cols = covariate.cols)

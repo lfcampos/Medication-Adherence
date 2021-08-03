@@ -8,9 +8,9 @@ source('infer/state_space_functions.R')
 # T: the length of the follow-up period
 # n.obs: number of observations per patient
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-n = 100
-T = 30
-n.obs = 4
+n = 500
+T = 90
+n.obs = 30
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Set parameters
