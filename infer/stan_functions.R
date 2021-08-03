@@ -7,7 +7,7 @@
 #
 # Input              : None
 # Output             : None
-# 
+#
 # References         : Measuring Effects of Medication Adherence on Time-Varying
 # 					   Health Outcomes using Bayesian Dynamic Linear Models
 # 					   Luis F. Campos, Mark E. Glickman, Kristen B. Hunter
@@ -18,13 +18,13 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# This function arranges a dataset (list form) into the format needed 
+# This function arranges a dataset (list form) into the format needed
 #  to analyze data in STAN.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 arrange.SS_stan = function(dat, is.sim = TRUE){
 	dat = lapply(dat, function(x) {
-		x$ni = length(x$I.y); 
+		x$ni = length(x$I.y);
 		if(is.sim){
 			x$y1 = x$y1[x$I.y]
 			x$y2 = x$y2[x$I.y]
@@ -53,73 +53,14 @@ arrange.SS_stan = function(dat, is.sim = TRUE){
 		}
 	}
 
-	# calculate average of c_t
-	mean_c = do.call('c', lapply(dat, function(x) x$mean_c))
-
 	id = rep(1:N, 2*ni)
 	t = do.call('c', lapply(dat, function(x) c(x$I.y, x$I.y)))
 
-
-	adherence_dat = list(N = N, J = J, T = T, maxT = maxT, ni = ni, n = n, X = X, c = c_matrix, y = y, id = id, t = t, yid = yid, mean_c = mean_c)
-
-	return(adherence_dat)
-}
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Arrange Data for stan: Basic Models
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-arrange.basic_stan = function(dat, is.sim = TRUE){
-	dat = lapply(dat, function(x) {
-		x$ni = length(x$I.y); 
-		if(is.sim){
-			x$y1 = x$y1[x$I.y]
-			x$y2 = x$y2[x$I.y]
-		}
-		x
-	})
-
-	X = do.call('rbind', lapply(dat, function(x) x$x))
-	y1 = do.call('c', lapply(dat, function(x) x$y1))
-	y2 = do.call('c', lapply(dat, function(x) x$y2))
-
-	y = cbind(y1, y2)
-
-	# y = do.call('c', lapply(dat, function(x) c(x$y1, x$y2)))
-	# yid = do.call('c', lapply(dat, function(x) c(rep(1, length(x$y1)), rep(2, length(x$y2)))))
-
-	N = length(dat)
-	J = ncol(X)
-
-	T = do.call('c', lapply(dat, function(x) x$T))
-	maxT = max(T)
-	ni = do.call('c', lapply(dat, function(x) x$ni))
-	n = sum(ni)
-
-	# c_matrix = matrix(NA, nrow = N, ncol = maxT)
-	# for(i in 1:N){
-	# 	c_t = dat[[i]]$c_t[,1]
-	# 	c_matrix[i, 1:length(c_t)] = c_t
-	# 	if(length(c_t) < maxT){
-	# 		c_matrix[i, (length(c_t)+1):maxT] = 9999
-	# 	}
-	# }
-
-	# calculate average of c_t
-	mean_c = do.call('c', lapply(dat, function(x) x$mean_c))
-
-	id = rep(1:N, ni)
-	t = do.call('c', lapply(dat, function(x) x$I.y))
-
-
-	adherence_dat = list(N = N, J = J, T = T, maxT = maxT, ni = ni, n = n, X = X, y = y, id = id, t = t, mean_c = mean_c)
+	adherence_dat = list(N = N, J = J, T = T, maxT = maxT, ni = ni, n = n,
+	                     X = X, c = c_matrix, y = y, id = id, t = t, yid = yid)
 
 	return(adherence_dat)
 }
-
-
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # general plotting function takes name, parameters and a label

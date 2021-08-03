@@ -1,2 +1,4 @@
 data/*
 predict/out/*
+*.DS_Store
+*.rds
