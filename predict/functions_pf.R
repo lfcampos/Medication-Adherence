@@ -216,7 +216,7 @@ post.samp.draw.pf = function(theta.row, datasets, run.params)
   c.star = array(
     NA, dim = c(n.patients, run.params[['npf']], run.params[['npredictdays']])
   )
-  c.star.means = ess = matrix(
+  ess = matrix(
     NA, nrow = n.patients, ncol = run.params[['npf']]
   )
   xpaths = list()
@@ -320,7 +320,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
   c.star = array(
     NA, dim = c(n.patients, run.params[['npf']], run.params[['npredictdays']])
   )
-  c.star.means = ess = matrix(
+  ess = matrix(
     NA, nrow = n.patients, ncol = run.params[['npf']]
   )
   p.prior.all = matrix(
@@ -495,6 +495,24 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
       print(paste('Expected total run time:', round( (run.params[['npf']]*difftime(time.end.learn, time.start.pf, units = 'secs')[[1]])/60), 'minutes'))
       print('---------------------------------------------------------------------------------------------')
     }
+
+    # save out intermediate results
+    c.star.means.iter = rowMeans(c.star[,1:e,, drop = FALSE], na.rm = TRUE, dims = 2)
+    c.means.iter = c.star.means.iter[new.patient.rows, , drop = FALSE]
+    p.prior.iter = p.prior.all[new.patient.rows, 1:e, drop = FALSE]
+    ess.iter = ess[new.patient.rows, 1:e, drop = FALSE]
+
+    draws = list(
+      'c.means' = c.means.iter,
+      'p.prior' = p.prior.iter,
+      'ess' = ess.iter,
+      'theta' = theta.all[,1:e, drop = FALSE],
+      'theta.a.rhat' = theta.a.rhat[,1:e, drop = FALSE],
+      'theta.h.rhat' = theta.h.rhat[,1:e, drop = FALSE],
+      'theta.a.divergent' = theta.a.divergent[1:e],
+      'theta.h.divergent' = theta.h.divergent[1:e]
+    )
+    saveRDS(draws, file = paste0(run.dir, 'draws_onestep.rds'))
   }
 
   # calculate means for each path
