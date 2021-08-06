@@ -468,7 +468,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
       param.order = names(theta.a$rhat)
       param.order = c(
         param.order[grepl('beta', param.order)],
-        param.order[grepl('delta', param.order) & !(grepl('sigma', param.order))],
+        param.order[grepl('delta', param.order) & !(grepl('sigma', param.order)) & !(grepl('new', param.order))],
         'sigma_delta', 'lp__'
       )
       theta.a.rhat[,e] = theta.a.rhat.iter[param.order]
