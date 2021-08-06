@@ -35,7 +35,7 @@ adherence_dat = arrange.SS_stan(dat, is.sim = TRUE)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Run analysis using STAN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-fit <- stan(file = 'infer/state_space_adherence.stan', data = adherence_dat, iter = 100, chains = 2)
+fit <- stan(file = 'infer/state_space_adherence.stan', data = adherence_dat, iter = 600, chains = 3)
 ex <- extract(fit)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #

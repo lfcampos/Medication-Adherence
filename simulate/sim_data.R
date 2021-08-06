@@ -2,15 +2,17 @@ setwd('/Users/khunter/Dropbox/Medication-Adherence')
 source('simulate/sim_data_functions.R')
 source('infer/state_space_functions.R')
 
+set.seed(08042021)
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Data Parameters
 # n: the number of patients
 # T: the length of the follow-up period
 # n.obs: number of observations per patient
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-n = 500
-T = 90
-n.obs = 30
+n = 50
+T = 30
+n.obs = 10
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Set parameters

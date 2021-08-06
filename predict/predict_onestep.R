@@ -21,6 +21,7 @@
 # CHANGE THIS to github repo directory
 ########################################################
 base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
+# base.dir = '/n/home01/khunter33/Medication-Adherence/'
 
 # source necessary files
 predict.dir = paste(base.dir, 'predict/', sep = '')
@@ -30,7 +31,7 @@ run.dir = base.setup(base.dir)
 predict.adherence = function()
 {
   # setup the data and parameters
-  setup.output = setup.all(base.dir, onestep = FALSE)
+  setup.output = setup.all(base.dir, onestep = TRUE)
   datasets = setup.output[['datasets']]
   run.params = setup.output[['run.params']]
 

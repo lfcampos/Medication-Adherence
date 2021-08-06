@@ -193,7 +193,7 @@ save.theta = function(theta.a, theta.h, run.params, delta.new = TRUE)
 # calculate quantiles for posterior adherence intervals
 #################################
 
-get.quantiles = function(ad.means, ad.prior, test.melt)
+get.quantiles = function(c.means, p.prior, test.melt)
 {
   # calculate quantiles
   ad.quantiles = data.frame(
@@ -204,22 +204,22 @@ get.quantiles = function(ad.means, ad.prior, test.melt)
   )
 
   # quantiles
-  for(i in 1:nrow(ad.means))
+  for(i in 1:nrow(c.means))
   {
-    ad.quantiles$prior.mean[i] = mean(ad.prior[i,])
-    ad.quantiles$lower.prior.95[i] = quantile(x = ad.prior[i,], probs = 0.025)
-    ad.quantiles$upper.prior.95[i] = quantile(x = ad.prior[i,], probs = 0.975)
-    ad.quantiles$lower.prior.80[i] = quantile(x = ad.prior[i,], probs = 0.1)
-    ad.quantiles$upper.prior.80[i] = quantile(x = ad.prior[i,], probs = 0.9)
-    ad.quantiles$lower.prior.50[i] = quantile(x = ad.prior[i,], probs = 0.25)
-    ad.quantiles$upper.prior.50[i] = quantile(x = ad.prior[i,], probs = 0.75)
+    ad.quantiles$prior.mean[i] = mean(p.prior[i,])
+    ad.quantiles$lower.prior.95[i] = quantile(x = p.prior[i,], probs = 0.025)
+    ad.quantiles$upper.prior.95[i] = quantile(x = p.prior[i,], probs = 0.975)
+    ad.quantiles$lower.prior.80[i] = quantile(x = p.prior[i,], probs = 0.1)
+    ad.quantiles$upper.prior.80[i] = quantile(x = p.prior[i,], probs = 0.9)
+    ad.quantiles$lower.prior.50[i] = quantile(x = p.prior[i,], probs = 0.25)
+    ad.quantiles$upper.prior.50[i] = quantile(x = p.prior[i,], probs = 0.75)
 
-    ad.quantiles$lower.95[i] = quantile(x = ad.means[i,], probs = 0.025)
-    ad.quantiles$upper.95[i] = quantile(x = ad.means[i,], probs = 0.975)
-    ad.quantiles$lower.80[i] = quantile(x = ad.means[i,], probs = 0.1)
-    ad.quantiles$upper.80[i] = quantile(x = ad.means[i,], probs = 0.9)
-    ad.quantiles$lower.50[i] = quantile(x = ad.means[i,], probs = 0.25)
-    ad.quantiles$upper.50[i] = quantile(x = ad.means[i,], probs = 0.75)
+    ad.quantiles$lower.95[i] = quantile(x = c.means[i,], probs = 0.025)
+    ad.quantiles$upper.95[i] = quantile(x = c.means[i,], probs = 0.975)
+    ad.quantiles$lower.80[i] = quantile(x = c.means[i,], probs = 0.1)
+    ad.quantiles$upper.80[i] = quantile(x = c.means[i,], probs = 0.9)
+    ad.quantiles$lower.50[i] = quantile(x = c.means[i,], probs = 0.25)
+    ad.quantiles$upper.50[i] = quantile(x = c.means[i,], probs = 0.75)
   }
 
   # coverage
