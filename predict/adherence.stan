@@ -17,24 +17,24 @@ transformed data {
 }
 
 parameters {
+  vector[N] delta;                    // random effects intercepts
+  real<lower=0> sigma_delta;          // random effects sd
   vector[P+1] beta;                   // fixed effects coefficients
-  vector[N] alpha;                    // random effects intercepts
-  real<lower=0> sigma_alpha;          // random effects sd
 }
 
 model {
-  alpha ~ normal(0, sigma_alpha);
+  delta ~ normal(0, sigma_delta);
 
   for(i in 1:N){
-    y[i] ~ binomial(total[i], inv_logit(alpha[i] + X[i,] * beta));
+   y[i] ~ binomial(total[i], inv_logit(delta[i] + X[i,] * beta));
   }
 }
 
 generated quantities {
-  vector[N_test] alpha_new;
+  vector[N_test] delta_new;
 
   for(i in 1:N_test){
-    alpha_new[i] = normal_rng(0, sigma_alpha);
+    delta_new[i] = normal_rng(0, sigma_delta);
   }
-  
+
 }

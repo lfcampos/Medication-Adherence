@@ -23,28 +23,36 @@ run.params[['cloud']] = FALSE
 ########################################################################
 # number of iterations etc
 ########################################################################
-# number of imputations
-run.params[['imputations']] = 20
 # number of posterior samples from training model
-# corresponds to "h" in manuscript
-run.params[['n.post.samp']] = 100
-# number of patients to predict adherence for
-run.params[['test.size']] = 2
+# corresponds to "f" in manuscript
+run.params[['npostsamp']] = 1
+# number of patients to predict adherence for. We have
+# 503 total, and 400 are fixed in the training set
+run.params[['train.size']] = 70
+run.params[['test.size']] = 30
 # number of particles
-run.params[['nparticles']] = 128
+# 'P' in manuscript
+run.params[['nparticles']] = 2
 # number of particle filter iterations
-# corresponds to "g" in manuscript
-run.params[['npf']] = 1000
+# corresponds to "e" in manuscript
+run.params[['npf']] = 4
 # particle filter burnin
-run.params[['burnin']] = run.params[['npf']]/5
+run.params[['burnin']] = round(run.params[['npf']]/5)
+# MCMC length
+run.params[['mcmc.chains']] = 2
+run.params[['theta.h.mcmc.length']] = 220
+run.params[['theta.a.mcmc.length']] = 220
 ########################################################################
 
 if(run.params[['test.code']])
 {
-  run.params[['imputations']] = 1
-  run.params[['n.post.samp']] = 3
-  run.params[['nparticles']] = 4
-  run.params[['npf']] = 10
   run.params[['test.size']] = 2
-  run.params[['burnin']] = run.params[['npf']]/5
+  run.params[['train.size']] = 3
+  run.params[['npostsamp']] = 2
+  run.params[['nparticles']] = 4
+  run.params[['npf']] = 3
+  run.params[['burnin']] = round(run.params[['npf']]/5)
+  run.params[['mcmc.chains']] = 2
+  run.params[['theta.h.mcmc.length']] = 120
+  run.params[['theta.a.mcmc.length']] = 120
 }

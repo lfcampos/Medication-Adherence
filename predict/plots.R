@@ -2,12 +2,13 @@
 # File Name          : plots.R
 # Programmer Name    : Kristen Hunter
 #                      kristenbhunter@gmail.com
-# 
+#
 # Last Updated       : Jan 2020
 #
 # Purpose            : Code to produce plots in paper
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
+library(wesanderson)
 
 # standardized colors for all plots
 plot.colors = c(wes_palette('Darjeeling2')[2], wes_palette('Darjeeling2')[3])
@@ -45,11 +46,11 @@ standard.legend = function(point.data)
     values = c('padhere' = 16, 'prior.mean' = 15),
     labels = c('padhere' = 'True Value', 'prior.mean' = 'Prior Mean')
   )
-    
+
   return(list(legend.color, legend.shape))
-    
+
 }
-  
+
 #################################
 # create interval plot
 #################################
@@ -57,9 +58,9 @@ standard.legend = function(point.data)
 gen.interval.plot = function(coverage.data, point.data, title)
 {
   # coverage.data = plot.data[['coverage.data']]; point.data = plot.data[['point.data']];
-  
+
   legend = standard.legend(point.data)
-  
+
   interval.plot = ggplot(coverage.data, aes(x = value, y = factor(id), color = cover)) +
     geom_line(size = 2.5) +
     geom_point(data = point.data, aes(x = value, shape = factor(variable)), size = 5) +
@@ -71,7 +72,7 @@ gen.interval.plot = function(coverage.data, point.data, title)
     theme(text = element_text(size = 20)) +
     theme(plot.title = element_text(size = 20)) +
     xlim(0, 1)
-  
+
   return(interval.plot)
 }
 
@@ -84,7 +85,7 @@ create.plot.data = function(ad.quantiles, exp.coverage, type = 'bp')
 {
   # type = 'bp'
   # type = 'ad'
-  
+
   # rearrange data
   cover.text = round(100 * exp.coverage)
   if(type == 'ad')
@@ -99,18 +100,18 @@ create.plot.data = function(ad.quantiles, exp.coverage, type = 'bp')
   )
   id.vars = c('id', 'bpday', 'adday', 'true', cover.var, width.var)
   ad.quantiles$true = ad.quantiles$padhere
-  
+
   # standardize colnames
   colnames = c('id', 'bpday', 'adday', 'true', 'cover', 'width', 'variable', 'value')
-  
+
   # coverage data
   coverage.data = melt(ad.quantiles[ ,c(id.vars, vars)], id.vars)
   colnames(coverage.data) = colnames
-  
+
   # point data
   point.data = melt(ad.quantiles[ ,c(id.vars, 'prior.mean', 'padhere')], id.vars)
   colnames(point.data)= colnames
-  
+
   return(list(point.data = point.data, coverage.data = coverage.data))
 }
 
@@ -140,7 +141,7 @@ plot.coverage = function(ad.quantiles,
                          type = 'bp')
 {
   # sample.size = 25; exp.coverage = 0.95; type = 'bp';
-  
+
   # first calculate coverage and generate title
   cover.text = round(100 * exp.coverage)
   if(type == 'ad')
@@ -150,21 +151,21 @@ plot.coverage = function(ad.quantiles,
   cover.var = paste('cover', cover.text, sep = '.')
   coverage.text = gen.coverage.text(ad.quantiles, cover.var, exp.coverage)
   title = paste('Predicted average adherence\n', coverage.text, sep = '')
-  
+
   # sample down to only show some patients on the final plot
   sample.size.min = min(sample.size, nrow(ad.quantiles))
   set.seed(3333)
   id.sample = sample(unique(ad.quantiles$id), sample.size.min)
   ad.quantiles = ad.quantiles[ad.quantiles$id %in% id.sample,]
-  
+
   plot.data = create.plot.data(ad.quantiles, exp.coverage, type = type)
-  
+
   interval.plot = gen.interval.plot(
     coverage.data = plot.data[['coverage.data']],
     point.data = plot.data[['point.data']],
     title = title
   )
-  
+
   return(interval.plot)
 }
 

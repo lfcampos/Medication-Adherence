@@ -2,7 +2,7 @@
 # File Name          : functions.R
 # Programmer Name    : Kristen Hunter
 #                      kristenbhunter@gmail.com
-# 
+#
 # Last Updated       : Jan 2020
 #
 # Purpose            : General supporting functions for prediction analysis
@@ -10,15 +10,15 @@
 
 
 #' Copy arguments into env and re-bind any function's lexical scope to bindTargetEnv .
-#' 
+#'
 #' See http://winvector.github.io/Parallel/PExample.html for example use.
-#' 
-#' 
-#' Used to send data along with a function in situations such as parallel execution 
-#' (when the global environment would not be available).  Typically called within 
+#'
+#'
+#' Used to send data along with a function in situations such as parallel execution
+#' (when the global environment would not be available).  Typically called within
 #' a function that constructs the worker function to pass to the parallel processes
 #' (so we have a nice lexical closure to work with).
-#' 
+#'
 #' @param bindTargetEnv environment to bind to
 #' @param objNames additional names to lookup in parent environment and bind
 #' @param names of functions to NOT rebind the lexical environments of
@@ -48,92 +48,152 @@ inv.logit = function(x) { return(exp(x)/(exp(x) + 1))}
 construct.sigma = function(param.row)
 {
   e.matrix = matrix(c(
-    param.row['sigma.s']^2,
-    param.row['gamma.sd'] * param.row['sigma.s'] * param.row['sigma.d'],
-    param.row['gamma.sd'] * param.row['sigma.s'] * param.row['sigma.d'],
-    param.row['sigma.d']^2
+    param.row['sigma.s.eps']^2,
+    param.row['rho.eps'] * param.row['sigma.s.eps'] * param.row['sigma.d.eps'],
+    param.row['rho.eps'] * param.row['sigma.s.eps'] * param.row['sigma.d.eps'],
+    param.row['sigma.d.eps']^2
   ), nrow = 2, ncol = 2)
   return(e.matrix)
 }
 
 #################################
-# get draws of theta a using stan
+# get draws of theta a
 #################################
 
-get.theta.a.draws.stan = function(datasets, run.params, predict.dir, run.dir)
+get.theta.a.draws = function(theta.a.stan.dat, covariate.cols, run.params, base.dir)
 {
-  # construct dataset to feed into stan
-  train.data = datasets[['train.melt']]
-  N_test = run.params[['test.size']]
-  # feed in binomial data, number of adherence days and number of total days
-  y = train.data$yesadday
-  total = train.data$adday
-  x = train.data[,datasets[['covariate.cols']], drop = FALSE]
-  N = nrow(x)
-  P = ncol(x)
-  # put into correct format for stan
-  stan_data = list(N = N, N_test = N_test, P = P, y = y, x = x, total = total)
-  
-  # if running locally, don't use all cores
   rstan_options(auto_write = TRUE)
   if(run.params[['cloud']])
-  { 
+  {
     options(mc.cores = parallel::detectCores())
   } else
   {
     options(mc.cores = parallel::detectCores() - 1)
   }
-  
-  # if testing the code, try a mini chain
-  if(run.params[['test.code']])
-  {
-    mcmc.length = 100
-    mcmc.chains = 1
-  } else
-  {
-    mcmc.length = 80000
-    mcmc.chains = 4
-  }
-  
+
+  # feed in binomial data, number of adherence days and number of total days
+  N_test = run.params[['test.size']]
+  y = theta.a.stan.dat$yesadday
+  total = theta.a.stan.dat$adday
+  x = theta.a.stan.dat[,covariate.cols, drop = FALSE]
+  N = nrow(x)
+  P = ncol(x)
+  stan_data = list(N = N, N_test = N_test, P = P, y = y, x = x, total = total)
+
   # fit stan model
-  fitted.model = stan(
-    file = paste(predict.dir, 'ran_ef.stan', sep = ''),
-    model_name = 'ran_ef',
+  fit = stan(
+    file = paste0(base.dir, 'predict/adherence.stan'),
     data = stan_data,
-    iter = mcmc.length * 1.2,
-    warmup = mcmc.length/5,
-    chains = mcmc.chains,
-    control = list(max_treedepth = 15)
+    iter = run.params[['theta.a.mcmc.length']],
+    chains = run.params[['mcmc.chains']]
   )
-  
+
   # save out results
-  fitted.values = extract(fitted.model)
+  fitted.values = extract(fit)
   theta.a.fixef = fitted.values$beta
-  colnames(theta.a.fixef) = c('intercept', datasets[['covariate.cols']])
+  colnames(theta.a.fixef) = c('intercept', covariate.cols)
   theta.a = list(
     'fixef' = theta.a.fixef,
-    'ranef.sd' = fitted.values$sigma_alpha,
-    'alpha.new' = fitted.values$alpha_new
+    'sigma.delta' = fitted.values$sigma_delta,
+    'delta.train' = fitted.values$delta,
+    'delta.new' = fitted.values$delta_new,
+    'rhat' = summary(fit)$summary[,'Rhat'],
+    'divergent' = get_num_divergent(fit)
   )
-  
-  # diagnostics
-  model.summary = summary(fitted.model)$summary
-  pars.keep = 
-    grepl('beta', rownames(model.summary)) |
-    grepl('sigma_alpha', rownames(model.summary))
-  model.diag = model.summary[pars.keep,]
-  write.csv(model.diag,
-    file = paste(run.dir, 'model_diagnostics.csv', sep = ''))
-  pars = rownames(model.summary)[pars.keep]
-  
-  return(list(theta.a = theta.a, fitted.model = fitted.model, pars = pars))
+
+  return(theta.a)
+}
+
+#################################
+# get draws of theta b
+#################################
+
+get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.dir)
+{
+  rstan_options(auto_write = TRUE)
+
+  if(run.params[['cloud']])
+  {
+    options(mc.cores = parallel::detectCores())
+  } else
+  {
+    options(mc.cores = parallel::detectCores() - 1)
+  }
+
+
+  fit = stan(
+    file = paste0(base.dir, 'infer/state_space_adherence.stan'),
+    data = theta.h.stan.dat,
+    iter = run.params[['theta.h.mcmc.length']],
+    warmup = run.params[['theta.h.mcmc.length']]/2,
+    chains = run.params[['mcmc.chains']]
+  )
+
+  theta.h = extract(fit)
+  dimnames(theta.h$beta) = list('iterations' = seq(1, dim(theta.h$beta)[1]),
+                                'covariates' = c('intercept', covariate.cols),
+                                'blood pressure' = c('sbp', 'dbp'))
+
+  theta.h$rhat = summary(fit)$summary[,'Rhat']
+  theta.h$divergent = get_num_divergent(fit)
+
+  return(theta.h)
+}
+
+#################################
+# rearrange theta.a and theta.h params for convenience and readability
+# only select a subsample for final inference
+#################################
+
+save.theta = function(theta.a, theta.h, run.params, delta.new = TRUE)
+{
+  # only select a subsample for inference
+  theta.h.subsample = sample(
+    seq(1, nrow(theta.h$rho)),
+    run.params[['npostsamp']],
+    replace = TRUE
+  )
+  theta.a.subsample = sample(
+    seq(1, nrow(theta.a[['fixef']])),
+    run.params[['npostsamp']],
+    replace = TRUE
+  )
+
+  params.b = data.frame(
+    rho.s = theta.h$rho[theta.h.subsample,1, drop = FALSE],
+    rho.d = theta.h$rho[theta.h.subsample,2, drop = FALSE],
+    phi.s = theta.h$phi[theta.h.subsample,1, drop = FALSE],
+    phi.d = theta.h$phi[theta.h.subsample,2, drop = FALSE],
+    sigma.s.eps = theta.h$sigma[theta.h.subsample,1, drop = FALSE],
+    sigma.d.eps = theta.h$sigma[theta.h.subsample,2, drop = FALSE],
+    rho.eps = theta.h$cor[theta.h.subsample],
+    sigma.s.nu = theta.h$sigma_nu[theta.h.subsample,1, drop = FALSE],
+    sigma.d.nu = theta.h$sigma_nu[theta.h.subsample,2, drop = FALSE],
+    sigma.s.0 = theta.h$sigma_0[theta.h.subsample,1, drop = FALSE],
+    sigma.d.0 = theta.h$sigma_0[theta.h.subsample,2, drop = FALSE],
+    beta.s = theta.h$beta[theta.h.subsample,,1, drop = FALSE],
+    beta.d = theta.h$beta[theta.h.subsample,,2, drop = FALSE]
+  )
+  params.a = data.frame(
+    beta.a = theta.a[['fixef']][theta.a.subsample, , drop = FALSE],
+    sigma.delta = theta.a[['sigma.delta']][theta.a.subsample],
+    delta.train = theta.a[['delta.train']][theta.a.subsample, , drop = FALSE]
+  )
+
+  if(delta.new)
+  {
+    params.a$delta.new = theta.a[['delta.new']][theta.a.subsample, , drop = FALSE]
+  }
+
+  params = cbind(params.b, params.a)
+  return(params)
 }
 
 #################################
 # calculate quantiles for posterior adherence intervals
 #################################
 
-get.quantiles = function(ad.means, ad.prior, test.melt)
+get.quantiles = function(c.means, p.prior, test.melt)
 {
   # calculate quantiles
   ad.quantiles = data.frame(
@@ -142,26 +202,26 @@ get.quantiles = function(ad.means, ad.prior, test.melt)
     bpday = test.melt$bpday,
     adday = test.melt$adday
   )
-  
+
   # quantiles
-  for(i in 1:nrow(ad.means))
+  for(i in 1:nrow(c.means))
   {
-    ad.quantiles$prior.mean[i] = mean(ad.prior[i,])
-    ad.quantiles$lower.prior.95[i] = quantile(x = ad.prior[i,], probs = 0.025)
-    ad.quantiles$upper.prior.95[i] = quantile(x = ad.prior[i,], probs = 0.975)
-    ad.quantiles$lower.prior.80[i] = quantile(x = ad.prior[i,], probs = 0.1)
-    ad.quantiles$upper.prior.80[i] = quantile(x = ad.prior[i,], probs = 0.9)
-    ad.quantiles$lower.prior.50[i] = quantile(x = ad.prior[i,], probs = 0.25)
-    ad.quantiles$upper.prior.50[i] = quantile(x = ad.prior[i,], probs = 0.75)
-    
-    ad.quantiles$lower.95[i] = quantile(x = ad.means[i,], probs = 0.025)
-    ad.quantiles$upper.95[i] = quantile(x = ad.means[i,], probs = 0.975)
-    ad.quantiles$lower.80[i] = quantile(x = ad.means[i,], probs = 0.1)
-    ad.quantiles$upper.80[i] = quantile(x = ad.means[i,], probs = 0.9)
-    ad.quantiles$lower.50[i] = quantile(x = ad.means[i,], probs = 0.25)
-    ad.quantiles$upper.50[i] = quantile(x = ad.means[i,], probs = 0.75)
+    ad.quantiles$prior.mean[i] = mean(p.prior[i,])
+    ad.quantiles$lower.prior.95[i] = quantile(x = p.prior[i,], probs = 0.025)
+    ad.quantiles$upper.prior.95[i] = quantile(x = p.prior[i,], probs = 0.975)
+    ad.quantiles$lower.prior.80[i] = quantile(x = p.prior[i,], probs = 0.1)
+    ad.quantiles$upper.prior.80[i] = quantile(x = p.prior[i,], probs = 0.9)
+    ad.quantiles$lower.prior.50[i] = quantile(x = p.prior[i,], probs = 0.25)
+    ad.quantiles$upper.prior.50[i] = quantile(x = p.prior[i,], probs = 0.75)
+
+    ad.quantiles$lower.95[i] = quantile(x = c.means[i,], probs = 0.025)
+    ad.quantiles$upper.95[i] = quantile(x = c.means[i,], probs = 0.975)
+    ad.quantiles$lower.80[i] = quantile(x = c.means[i,], probs = 0.1)
+    ad.quantiles$upper.80[i] = quantile(x = c.means[i,], probs = 0.9)
+    ad.quantiles$lower.50[i] = quantile(x = c.means[i,], probs = 0.25)
+    ad.quantiles$upper.50[i] = quantile(x = c.means[i,], probs = 0.75)
   }
-  
+
   # coverage
   calc.cover = function(true, lower, upper)
   {
@@ -179,7 +239,7 @@ get.quantiles = function(ad.means, ad.prior, test.melt)
   ad.quantiles$cover.50 = calc.cover(
     ad.quantiles$padhere, ad.quantiles$lower.50, ad.quantiles$upper.50
   )
-  
+
   # coverage for 'prior' intervals
   ad.quantiles$cover.prior.95 = calc.cover(
     ad.quantiles$padhere, ad.quantiles$lower.prior.95, ad.quantiles$upper.prior.95
@@ -190,12 +250,12 @@ get.quantiles = function(ad.means, ad.prior, test.melt)
   ad.quantiles$cover.prior.50 = calc.cover(
     ad.quantiles$padhere, ad.quantiles$lower.prior.50, ad.quantiles$upper.prior.50
   )
-  
+
   # interval width
   ad.quantiles$width.95 = ad.quantiles$upper.95 - ad.quantiles$lower.95
   ad.quantiles$width.80 = ad.quantiles$upper.80 - ad.quantiles$lower.80
   ad.quantiles$width.50 = ad.quantiles$upper.50 - ad.quantiles$lower.50
-  
+
   # interval width for 'prior' intervals
   ad.quantiles$width.prior.95 = ad.quantiles$upper.prior.95 - ad.quantiles$lower.prior.95
   ad.quantiles$width.prior.80 = ad.quantiles$upper.prior.80 - ad.quantiles$lower.prior.80

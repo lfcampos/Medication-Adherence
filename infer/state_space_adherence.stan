@@ -1,6 +1,6 @@
 data {
   //data sizes
-  int<lower=0> N;         // number of subjects 
+  int<lower=0> N;         // number of subjects
   int<lower=0> J;         // number of covariates observed
   int<lower=0> T[N];      // number of days followed per subject
   int<lower=0> maxT;      // maximum number of days observed
@@ -13,9 +13,9 @@ data {
 
   //outcomes
   vector[2*n] y;             // outcome vector
-  int<lower=0> id[2*n];     // subject index for outcome vector
-  int<lower=0> t[2*n];     // time index for outcome vector 
-  int<lower=0> yid[2*n];     // time index for outcome vector 
+  int<lower=0> id[2*n];      // subject index for outcome vector
+  int<lower=0> t[2*n];       // time index for outcome vector
+  int<lower=0> yid[2*n];     // time index for outcome vector
 
 }
 
@@ -44,7 +44,7 @@ model {
     rho[i] ~ beta(3,1);       //auto-correlation
     phi[i] ~ normal(0,5);     //daily adherence effect
     sigma[i] ~ uniform(0,30); //measurement error standard deviation
-    sigma_nu[i] ~ uniform(0,10); //innovation standard deviation 
+    sigma_nu[i] ~ uniform(0,10); //innovation standard deviation
     sigma_0[i] ~ uniform(0,30);  //initial random effect standard deviation
   }
   cor ~ uniform(-1, 1);        // measurement error correlation
@@ -75,7 +75,7 @@ model {
         s[j] = rho[yid[i]]^(2*(t[i]-j)) * sigma_nu[yid[i]]^2;
       }
       Sigma[i,i] = sum(s);
-    }    
+    }
   }
   // Calculate rest of covariance matrix
   for(i in 1:(2*n)){
@@ -95,7 +95,7 @@ model {
         }
       }
     }
-    // Measurement error 
+    // Measurement error
     Sigma[i,i] = Sigma[i,i] + (sigma[yid[i]])^2;
   }
 
