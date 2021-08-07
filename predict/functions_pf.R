@@ -366,7 +366,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
     # calculate prior probability
     delta = matrix(NA, ncol = nrow(X))
     # if an existing patient, random intercept is known
-    if(e == 1)
+    if(e < 10)
     {
       delta[old.patient.rows] = theta.row[grep('delta.train', names(theta.row))]
       delta[new.patient.rows] = theta.row[grep('delta.new', names(theta.row))]
@@ -418,10 +418,10 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
     if(e < 10)
     {
-      theta_b_stan_dat = datasets$train$data.stan
+      theta_h_stan_dat = datasets$train$data.stan
       theta_a_stan_dat = datasets$train$data.melt
 
-      theta.h = get.theta.h.draws(theta_b_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
+      theta.h = get.theta.h.draws(theta_h_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
       theta.a = get.theta.a.draws(theta_a_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
       theta.iter = save.theta(theta.a, theta.h, run.params, delta.new = TRUE)
 
