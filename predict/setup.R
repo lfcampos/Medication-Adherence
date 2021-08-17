@@ -194,7 +194,7 @@ setup.data = function(run.params, covariate.cols, dat)
   # split into training/testing
   ids = melted$id
   n.test = run.params[['test.size']]
-  n.train = length(ids) - n.test
+  n.train = run.params[['train.size']]
   set.seed(100)
   train.ids = sample(ids, n.train)
   test.ids = sample(ids[!(ids %in% train.ids)], n.test)

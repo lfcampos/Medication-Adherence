@@ -378,6 +378,9 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
     p.prior = exp(xabeta + delta)/(1 + exp(xabeta + delta))
     p.prior.all[,e] = p.prior
 
+    remove(beta.s, beta.d, beta.a)
+    remove(delta, xabeta)
+
     for(k in 1:n.patients)
     {
       patient = datasets$full$data.full[datasets$full$data.full$id == ids[k],]
@@ -410,6 +413,9 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
       remove(pf.output)
       c.star[k,e,] = c(xpaths[[k]][3,], rep(NA, run.params[['npredictdays']] - length(xpaths[[k]][3,])))
     }
+
+    # clean up
+    remove(patient, Y, xbeta, xdbeta, xsbeta, p.prior)
 
     if(e == 2)
     {
@@ -480,7 +486,9 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
     theta.row = unlist(theta.iter[1,])
     theta.all[,e] = theta.row
-    remove(theta.a, theta.h)
+
+    remove(theta_a_stan_dat, theta_h_stan_dat)
+    remove(theta.a, theta.h, theta.iter)
     gc()
 
     # Keep track of simulation runtime
@@ -513,6 +521,8 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
       'theta.h.divergent' = theta.h.divergent[1:e]
     )
     saveRDS(draws, file = paste0(run.dir, 'draws_onestep.rds'))
+    remove(c.star.means.iter, c.means.iter, p.prior.iter, ess.iter, draws)
+    gc()
   }
 
   # calculate means for each path
@@ -603,14 +613,17 @@ draw.c.star = function(datasets, theta, run.params, cl = NULL)
 draw.c.star.onestep = function(datasets, run.params, base.dir)
 {
   # begin with a warm start: initial draw of theta parameters
-  theta.h.stan.dat = datasets[['train']]$data.stan
-  theta.a.stan.dat = datasets[['train']]$data.melt
   covariate.cols = datasets[['train']][['covariate.cols']]
 
-  theta.h = get.theta.h.draws(theta.h.stan.dat, covariate.cols, run.params, base.dir)
-  theta.a = get.theta.a.draws(theta.a.stan.dat, covariate.cols, run.params, base.dir)
+  theta.h = get.theta.h.draws(theta.h.stan.dat = datasets[['train']]$data.stan,
+                              covariate.cols, run.params, base.dir)
+  theta.a = get.theta.a.draws(theta.a.stan.dat = datasets[['train']]$data.melt,
+                              covariate.cols, run.params, base.dir)
   theta = save.theta(theta.a, theta.h, run.params, delta.new = TRUE)
   theta.row = unlist(theta[1,])
+
+  remove(theta, theta.h, theta.a, covariate.cols)
+  gc()
 
   # draw posterior samples
   post.output = post.samp.draw.pf.onestep(theta.row, datasets, run.params, base.dir)

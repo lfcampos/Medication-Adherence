@@ -35,6 +35,8 @@ predict.adherence = function()
   datasets = setup.output[['datasets']]
   run.params = setup.output[['run.params']]
 
+  remove(setup.output)
+
   # predict adherence
   predict.draws = draw.c.star.onestep(datasets, run.params, base.dir)
 
