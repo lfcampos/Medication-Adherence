@@ -31,7 +31,7 @@ run.dir = base.setup(base.dir)
 predict.adherence = function()
 {
   # setup the data and parameters
-  setup.output = setup.all(base.dir, onestep = TRUE)
+  setup.output = setup.all(base.dir, run.dir, onestep = TRUE)
   datasets = setup.output[['datasets']]
   run.params = setup.output[['run.params']]
 

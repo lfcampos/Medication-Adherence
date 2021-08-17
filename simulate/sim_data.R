@@ -10,8 +10,8 @@ set.seed(08042021)
 # T: the length of the follow-up period
 # n.obs: number of observations per patient
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-n = 50
-T = 30
+n = 500
+T = 90
 n.obs = 10
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #

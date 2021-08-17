@@ -70,7 +70,7 @@ base.setup = function(base.dir)
 }
 
 # loads in and sets up data
-setup.all = function(base.dir, onestep = FALSE)
+setup.all = function(base.dir, run.dir, onestep = FALSE)
 {
   data.dir = paste(base.dir, 'data/', sep = '')
 
@@ -78,6 +78,10 @@ setup.all = function(base.dir, onestep = FALSE)
   # theta h = blood pressure model, provided by previous analysis
   dat = readRDS(paste0(data.dir, 'dat.RDS'))
   covariate.cols = readRDS(paste0(data.dir, 'covariate_cols.RDS'))
+
+  # copy over to run dir for saving
+  saveRDS(dat, paste0(run.dir, 'data.RDS'))
+  saveRDS(covariate.cols, paste0(run.dir, 'covariate_cols.RDS'))
 
   if(!onestep)
   {

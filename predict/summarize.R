@@ -11,7 +11,7 @@
 ################################################
 # CHANGE THIS to output directory to be summarized
 ################################################
-run.date = '20210804_21'
+run.date = '20210814_19'
 run.type = 'onestep'
 
 # setup
@@ -105,6 +105,18 @@ p.prior = draws[['p.prior']]
 interval.summary = summarize.adherence(c.means, p.prior, run.params)
 print(interval.summary)
 
+# convergence
+ess = draws[['ess']]
+theta = draws[['theta']]
+theta.a.rhat = draws[['theta.a.rhat']]
+theta.h.rhat = draws[['theta.h.rhat']]
+
+# check diagnostics
+rhat.target = 1.01
+
+sum(theta.a.rhat > rhat.target)
+sum(theta.h.rhat > rhat.target)
+
 # produce table summary of adherence model
 summarize.theta.a = function(theta.a, param_titles)
 {
@@ -135,14 +147,14 @@ summarize.theta.a = function(theta.a, param_titles)
   return(theta_summary)
 }
 
-load(paste0(run.dir, 'theta_a.RData'))
-# maps out original variable names to "nice" ones you may want to print in a table
-param_titles = data.frame(
-  orig = c(
-    'intercept', 'gender', 'ranef.sd.summary', 'alpha.summary'
-  ),
-  nice = c(
-    'Intercept', 'Male', 'Random effect standard deviation', 'Alpha'
-  ))
-theta.a.summary = summarize.theta.a(theta.a, param_titles)
-print(theta.a.summary)
+# load(paste0(run.dir, 'theta_a.RData'))
+# # maps out original variable names to "nice" ones you may want to print in a table
+# param_titles = data.frame(
+#   orig = c(
+#     'intercept', 'gender', 'ranef.sd.summary', 'alpha.summary'
+#   ),
+#   nice = c(
+#     'Intercept', 'Male', 'Random effect standard deviation', 'Alpha'
+#   ))
+# theta.a.summary = summarize.theta.a(theta.a, param_titles)
+# print(theta.a.summary)
