@@ -20,7 +20,8 @@
 ########################################################
 # CHANGE THIS to github repo directory
 ########################################################
-base.dir = '/Users/khunter/Dropbox/archive/Medication-Adherence/'
+# base.dir = '/Users/khunter/Dropbox/archive/Medication-Adherence/'
+base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
 
 # source necessary files
 predict.dir = paste(base.dir, 'predict/', sep = '')
@@ -29,25 +30,38 @@ run.dir = base.setup(base.dir)
 
 predict.adherence = function()
 {
-  ################################################
-  # setup
-  ################################################
-
   # setup the data and simulation
-  setup.output = setup.all(base.dir)
+  setup.output = setup.all(base.dir, run.dir)
 
   # save out important parameters
   datasets = setup.output[['datasets']]
-  run.params = setup.output[['run.params']]
-  # posterior draws from training set for health outcomes model
+
+  if(run.params[['test.code']])
+  {
+    cl = NULL
+  } else
+  {
+    # initiate cluster
+    num.cores = ifelse(run.params[['odyssey']], detectCores(), detectCores() - 1)
+    outfile = paste(run.dir, 'out.txt', sep = '')
+    cl = makeCluster(num.cores, outfile = outfile)
+  }
+
+  # calculate how many days to predict for (i.e. the maximum any patient has)
+  run.params[['npredictdays']] = max(datasets$test$data.melt$mday)
+
+  # these are posterior draws from training set for blood pressure model
+  # provided by Luis
   theta.h = setup.output[['theta.h']]
 
   ################################################
   # posterior draws from training set for unconditional adherence model
   ################################################
-
-  theta.a.model = get.theta.a.draws.stan(datasets, run.params, predict.dir, run.dir)
-  theta.a = theta.a.model[['theta.a']]
+  theta.a = get.theta.a.draws(
+    theta.a.stan.dat = datasets[['train']][['data.melt']],
+    covariate.cols = datasets[['train']][['covariate.cols']],
+    run.params, base.dir
+  )
   save(theta.a, file = paste(run.dir, 'theta_a.RData', sep = ''))
   theta = save.theta(theta.a, theta.h, run.params)
 
@@ -55,19 +69,9 @@ predict.adherence = function()
   # predictions of adherence
   ################################################
 
-  if(run.params[['test.code']])
-  {
-    cl = NULL
-  } else
-  {
-    # initiate cluster (if running locally, don't use all available cores)
-    num.cores = ifelse(run.params[['cloud']], detectCores(), detectCores() - 1)
-    outfile = paste(run.dir, 'out.txt', sep = '')
-    cl = makeCluster(num.cores, outfile = outfile)
-  }
+  set.seed(05242021)
 
-  # predict mean adherence values for each patient
-  predict.draws = draw.ad.star(datasets, theta, run.params, cl)
+  predict.draws = draw.c.star(datasets = datasets[['test']], theta, run.params, base.dir, cl)
 
   if(!run.params[['test.code']])
   {

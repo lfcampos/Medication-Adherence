@@ -182,7 +182,7 @@ PF = function(nparticles, model, theta.row, p.particles, xobs, Y, xbeta,
 # run particle filter for one draw of posterior sample
 #################################
 
-post.samp.draw.pf = function(theta.row, datasets, run.params)
+post.samp.draw.pf = function(theta.row, datasets, run.params, base.dir)
 {
   # theta.row = unlist(theta[1,])
 
@@ -194,6 +194,7 @@ post.samp.draw.pf = function(theta.row, datasets, run.params)
   # preparation
   ids = unique(datasets$data.full$id)
   X = as.matrix(cbind(intercept = 1, datasets$data.melt[,datasets$covariate.cols]))
+  n.patients = nrow(X)
 
   # calculate xbetas to save time later
   beta.s = as.matrix(theta.row[grep('beta.s', names(theta.row))])
@@ -210,13 +211,20 @@ post.samp.draw.pf = function(theta.row, datasets, run.params)
   # if an existing patient, random intercept is known
   delta[!datasets$data.melt$new.patient] = theta.row[grep('delta.train', names(theta.row))]
   delta[datasets$data.melt$new.patient] = theta.row[grep('delta.new', names(theta.row))]
+
+  # check!
+  if(length(xabeta) != length(delta))
+  {
+    stop(paste('Incorrect delta length:', length(delta)))
+  }
+
   p.prior = exp(xabeta + delta)/(1 + exp(xabeta + delta))
 
   # prepare to save out main paths
   c.star = array(
     NA, dim = c(n.patients, run.params[['npf']], run.params[['npredictdays']])
   )
-  ess = matrix(
+  c.star.means = ess = matrix(
     NA, nrow = n.patients, ncol = run.params[['npf']]
   )
   xpaths = list()
@@ -225,11 +233,6 @@ post.samp.draw.pf = function(theta.row, datasets, run.params)
   {
     print('---------------------------------------------------------------------------------------------')
     print(paste('Particle filter iteration:', e, 'out of', run.params[['npf']]))
-    if(e > 2)
-    {
-      time.now = Sys.time()
-      print(paste('Time elapsed:', timediff(time.now, time.start.pf)))
-    }
     print('---------------------------------------------------------------------------------------------')
 
     if(e == 2)
@@ -274,16 +277,8 @@ post.samp.draw.pf = function(theta.row, datasets, run.params)
       time.end.pf = Sys.time()
       print('---------------------------------------------------------------------------------------------')
       print('Runtime statistics')
-      print(paste(
-        'One iteration took',
-        round(difftime(time.end.pf, time.start.pf, units = 'secs')[[1]], 2),
-        'seconds'
-      ))
-      print(paste(
-        'Expected total run time:',
-        round( (run.params[['npf']]*difftime(time.end.pf, time.start.pf, units = 'secs')[[1]])/60),
-        'minutes'
-      ))
+      print(paste('One iteration took', round(difftime(time.end.pf, time.start.pf, units = 'secs')[[1]], 2), 'seconds'))
+      print(paste('Expected total run time:', round( (run.params[['npf']]*difftime(time.end.pf, time.start.pf, units = 'secs')[[1]])/60), 'minutes'))
       print('---------------------------------------------------------------------------------------------')
     }
   }
@@ -544,16 +539,16 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 # set up parallelization
 #################################
 
-mkWorker.pf = function(datasets, run.params) {
+mkWorker.pf = function(datasets, run.params, base.dir) {
 
   bindToEnv(objNames = c('datasets', 'run.params',
                          'post.samp.draw.pf', 'PF', 'construct.sigma', 'apply.dmvnorm',
                          'rinit', 'rtransition', 'dtransition', 'dmeasurement',
-                         'model'))
+                         'model', 'base.dir'))
 
   worker = function(theta.row) {
     post.samp.draw.pf(
-      theta.row, datasets, run.params
+      theta.row, datasets, run.params, base.dir
     )
   }
   return(worker)
@@ -563,47 +558,58 @@ mkWorker.pf = function(datasets, run.params) {
 # draw predicted adherence vector for all patients
 #################################
 
-draw.c.star = function(datasets, theta, run.params, cl = NULL)
+draw.c.star = function(datasets, theta, run.params, base.dir, cl = NULL)
 {
   if(!run.params[['test.code']])
   {
     post.output = parApply(
       cl, theta, 1,
-      mkWorker.pf(datasets, run.params)
+      mkWorker.pf(datasets, run.params, base.dir)
     )
   } else
   {
     post.output = apply(
       theta, 1,
-      mkWorker.pf(datasets, run.params)
+      mkWorker.pf(datasets, run.params, base.dir)
     )
   }
 
   # predicted probability with blood pressure
-  c.star.mean.list = lapply(post.output, function(x) x[['c.star.mean']])
+  c.star.mean.list = lapply(post.output, function(x) x[['c.star.means']])
   c.star.mean = abind(c.star.mean.list, along = 3)
   c.star.mean = aperm(c.star.mean, c(1,3,2))
   dimnames(c.star.mean) = list(
-    'patient.id' = unique(datasets$test.melt$id),
-    'post.sample.id' = seq(1, run.params[['n.post.samp']], 1),
+    'patient.id' = unique(datasets$data.melt$id),
+    'post.sample.id' = seq(1, run.params[['npostsamp']], 1),
     'pf.id' = seq(1, run.params[['npf']] - run.params[['burnin']])
   )
 
   # predicted probability before blood pressure
-  ad.prior.list = lapply(post.output, function(x) x[['ad.prior']])
-  ad.prior = t(abind(ad.prior.list, along = 1))
-  dimnames(ad.prior) = list(
-    'id' = unique(datasets$test.melt$id),
-    'post.sample.id' = seq(1, run.params[['n.post.samp']], 1)
+  p.prior.list = lapply(post.output, function(x) x[['p.prior']])
+  p.prior = t(abind(p.prior.list, along = 1))
+  dimnames(p.prior) = list(
+    'id' = unique(datasets$data.melt$id),
+    'post.sample.id' = seq(1, run.params[['npostsamp']], 1)
+  )
+
+  # effective sample size
+  ess.list = lapply(post.output, function(x) x[['ess']])
+  ess = abind(ess.list, along = 3)
+  ess = aperm(ess, c(1,3,2))
+  dimnames(ess) = list(
+    'id' = unique(datasets$data.melt$id),
+    'post.sample.id' = seq(1, run.params[['npostsamp']], 1),
+    'pf.id' = seq(1, run.params[['npf']] - run.params[['burnin']])
   )
 
   # re-arrange to make into a 2-D array instead of a 3-D array
   c.star.mean.new = apply(c.star.mean, 1, rbind)
   c.star.mean.new = aperm(c.star.mean.new, c(2,1))
+  ess.new = apply(ess, 1, rbind)
+  ess.new = aperm(ess.new, c(2,1))
 
-  return(list('ad.means' = c.star.mean.new, 'ad.prior' = ad.prior))
+  return(list('c.means' = c.star.mean.new, 'p.prior' = p.prior, 'ess' = ess.new, 'theta' = theta))
 }
-
 
 #################################
 # draw predicted adherence vector for all patients
