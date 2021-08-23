@@ -272,15 +272,18 @@ post.samp.draw.pf = function(theta.row, datasets, run.params, base.dir)
       c.star[k,e,] = c(xpaths[[k]][3,], rep(NA, run.params[['npredictdays']] - length(xpaths[[k]][3,])))
     }
 
+    time.end.pf = Sys.time()
+    print('---------------------------------------------------------------------------------------------')
+    print('Runtime statistics')
     if(e == 2)
     {
-      time.end.pf = Sys.time()
-      print('---------------------------------------------------------------------------------------------')
-      print('Runtime statistics')
       print(paste('One iteration took', round(difftime(time.end.pf, time.start.pf, units = 'secs')[[1]], 2), 'seconds'))
       print(paste('Expected total run time:', round( (run.params[['npf']]*difftime(time.end.pf, time.start.pf, units = 'secs')[[1]])/60), 'minutes'))
-      print('---------------------------------------------------------------------------------------------')
+    } else if (e > 2)
+    {
+      print(paste('Elapsed time:', round(difftime(time.end.pf, time.start.pf, units = 'secs')[[1]], 2), 'seconds'))
     }
+    print('---------------------------------------------------------------------------------------------')
   }
 
   # calculate means for each path
@@ -412,10 +415,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
     # clean up
     remove(patient, Y, xbeta, xdbeta, xsbeta, p.prior)
 
-    if(e == 2)
-    {
-      time.end.pf = Sys.time()
-    }
+    time.end.pf = Sys.time()
 
     if(e < 10)
     {
@@ -486,18 +486,20 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
     remove(theta.a, theta.h, theta.iter)
     gc()
 
-    # Keep track of simulation runtime
+    print('---------------------------------------------------------------------------------------------')
+    print('Runtime statistics')
+    time.end.learn = Sys.time()
     if(e == 2)
     {
-      time.end.learn = Sys.time()
-      print('---------------------------------------------------------------------------------------------')
-      print('Runtime statistics')
       print(paste('One iteration took', round(difftime(time.end.learn, time.start.pf, units = 'secs')[[1]], 2), 'seconds'))
       print(paste('PF time:', round(difftime(time.end.pf, time.start.pf, units = 'secs')[[1]], 2), 'seconds'))
       print(paste('Learn time:', round(difftime(time.end.learn, time.end.pf, units = 'secs')[[1]], 2), 'seconds'))
       print(paste('Expected total run time:', round( (run.params[['npf']]*difftime(time.end.learn, time.start.pf, units = 'secs')[[1]])/60), 'minutes'))
-      print('---------------------------------------------------------------------------------------------')
+    } else if (e > 2)
+    {
+      print(paste('Elapsed time:', round(difftime(time.end.learn, time.start.pf, units = 'secs')[[1]], 2), 'seconds'))
     }
+    print('---------------------------------------------------------------------------------------------')
 
     # save out intermediate results
     c.star.means.iter = rowMeans(c.star[,1:e,, drop = FALSE], na.rm = TRUE, dims = 2)
