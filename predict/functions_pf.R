@@ -364,7 +364,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
     # calculate prior probability
     delta = matrix(NA, ncol = nrow(X))
     # if an existing patient, random intercept is known
-    if(e < 10)
+    if(e < 11)
     {
       delta[old.patient.rows] = theta.row[grep('delta.train', names(theta.row))]
       delta[new.patient.rows] = theta.row[grep('delta.new', names(theta.row))]
