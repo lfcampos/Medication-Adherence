@@ -29,6 +29,9 @@ Sigma.nu = matrix(c(params[['sig.nu']][1]^2, 0, 0, params[['sig.nu']][2]^2), nro
 Sigma.0 = matrix(c(params[['sig.0']][1]^2, 0, 0, params[['sig.0']][2]^2), nrow = 2)
 beta = matrix(params[['beta']], nrow = 2)
 
+# adherence model
+beta.a = c(0, -0.4)
+sigma.delta = 1.1
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Simulate Data
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -42,13 +45,14 @@ beta = matrix(params[['beta']], nrow = 2)
 # The way this is set up, all patients have the same follow-up period (T)
 #  and outcome observation days I.y/
 # We can randomize this as
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 dat = replicate(n, {
-  simulate.SS_2D(rho = params[[1]], phi = params[[2]],
+  simulate.SS_2D(T = T, rho = params[[1]], phi = params[[2]],
                  Sigma.nu = Sigma.nu, Sigma.BP = Sigma.BP,
-                 Sigma.0 = Sigma.0, T = T, beta = beta, I.y = sort(sample(1:T, n.obs)))
+                 Sigma.0 = Sigma.0, beta = beta,
+                 sigma.delta = sigma.delta, beta.a = beta.a,
+                 I.y = sort(sample(1:T, n.obs)))
 }, simplify = FALSE)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #

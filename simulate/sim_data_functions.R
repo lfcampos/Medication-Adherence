@@ -27,18 +27,24 @@
 #	I.y   - vecor(integer): indexes of t = 1, 2, ..., T to keep
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-simulate.SS_2D = function(rho = NULL, phi = NULL, Sigma.nu = NULL, Sigma.BP = NULL, Sigma.0 = NULL, T = NULL, beta = NULL, c_t = NULL, n.obs = NULL, I.y = NULL){
-
-  # simulate adherence measures
-  if(is.null(c_t)) c_t = matrix(2*rbinom(T, 1, 0.5) - 1, T, 1)
+simulate.SS_2D = function(T, rho, phi, Sigma.nu, Sigma.BP, Sigma.0, beta,
+                          sigma.delta, beta.a,
+                          c_t = NULL, n.obs = NULL, I.y = NULL){
 
   # Make binary x vector the length of beta with intercept
   x = c(1, sample(c(0, 1), nrow(beta) - 1, replace = TRUE))
+
+  # simulate adherence
+  delta = rnorm(1, 0, sigma.delta)
+  eta = delta + x[1] * beta.a[1] + x[2] * beta.a[2]
+  p = exp(eta)/(1 + exp(eta))
+  if(is.null(c_t)) c_t = matrix(2*rbinom(T, 1, p) - 1, T, 1)
+
   # calculate complete mean vector
   mu1 = mu_T(T, x, c_t, rho[1], phi[1], Sigma.nu[1,1], Sigma.BP[1,1], Sigma.0[1,1], beta[,1])
   mu2 = mu_T(T, x, c_t, rho[2], phi[2], Sigma.nu[2,2], Sigma.BP[2,2], Sigma.0[2,2], beta[,2])
 
-  # caluclate complete covariance matrix
+  # calculate complete covariance matrix
   Sigma1 = Sigma_T(T, rho[1], phi[1], Sigma.nu[1,1], Sigma.BP[1,1], Sigma.0[1,1], beta[,1])
   Sigma2 = Sigma_T(T, rho[2], phi[2], Sigma.nu[2,2], Sigma.BP[2,2], Sigma.0[2,2], beta[,2])
   Sigma12 = diag(Sigma.BP[1,2], nrow = T)

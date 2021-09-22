@@ -327,6 +327,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
   theta.all = matrix(
     NA, nrow = length(theta.row), ncol = run.params[['npf']]
   )
+  rownames(theta.all) = names(theta.row)
   xpaths = list()
 
   # split into old and new patients

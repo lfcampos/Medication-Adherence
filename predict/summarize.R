@@ -11,7 +11,7 @@
 ################################################
 # CHANGE THIS to output directory to be summarized
 ################################################
-run.date = '20210814_19'
+run.date = '20210906_22'
 run.type = 'onestep'
 
 # setup
@@ -24,11 +24,8 @@ run.dir = paste(predict.dir, 'out/run_', run.date, '/', sep = '')
 # plots and save out summary statistics
 ################################################
 
-summarize.adherence = function(c.means, p.prior, run.params)
+summarize.adherence = function(c.means, p.prior, test.melt, run.params)
 {
-  # get test data once
-  setup.output = setup.all(base.dir, onestep = TRUE)
-  test.melt = setup.output[['datasets']][['test']][['data.melt']]
 
   # get adherence quantiles
   ad.quantiles = get.quantiles(c.means, p.prior, test.melt)
@@ -102,8 +99,49 @@ source(paste(predict.dir, 'setup.R', sep = ''))
 draws = readRDS(file = paste0(run.dir, 'draws_', run.type, '.rds'))
 c.means = draws[['c.means']]
 p.prior = draws[['p.prior']]
-interval.summary = summarize.adherence(c.means, p.prior, run.params)
+
+
+# get test data once
+setup.output = setup.all(base.dir, run.dir, onestep = TRUE)
+test.melt = setup.output[['datasets']][['test']][['data.melt']]
+
+interval.summary = summarize.adherence(c.means, p.prior, test.melt, run.params)
 print(interval.summary)
+
+# plot of draws over time
+c.means = data.frame(c.means)
+c.means = cbind(test.melt$id, c.means)
+colnames(c.means) = c('id', 1:(ncol(c.means) - 1))
+
+c.means.melt = melt(c.means, id.vars = 'id')
+c.means.melt$id = factor(c.means.melt$id)
+ggplot(c.means.melt, aes(x = variable, y = value, group = id)) +
+  geom_line() +
+  facet_wrap(id ~ .) +
+  geom_hline(data = test.melt, aes(yintercept = padhere)) +
+  ylim(0, 1)
+
+# plot of model draws over time
+true.params = c(
+  'rho.s' = 0.8,
+  'rho.d' = 0.2,
+  'phi.s' = 0.5,
+  'phi.d' = 0.7,
+  'sigma.s.eps' = 2.75,
+  'sigma.d.eps' = 2.2,
+  'rho.eps' = 0.55,
+  'sigma.s.nu' = 1,
+  'sigma.d.nu' = 0.8,
+  'sigma.s.0' = 1.5,
+  'sigma.d.0' = 1.3,
+  'beta.s.intercept.sbp' = 120,
+  'beta.s.gender.sbp' = -1.2,
+  'beta.d.intercept.dbp' = 80,
+  'beta.d.gender.dbp' = -1.2,
+  'beta.a.intercept' = 0,
+  'beta.a.gender' = -0.4,
+  'sigma.delta' = 1.1
+)
 
 # convergence
 ess = draws[['ess']]
