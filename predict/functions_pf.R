@@ -626,8 +626,10 @@ draw.c.star.onestep = function(datasets, run.params, base.dir)
 
   theta.h = get.theta.h.draws(theta.h.stan.dat = datasets[['train']]$data.stan,
                               covariate.cols, run.params, base.dir)
+  gc()
   theta.a = get.theta.a.draws(theta.a.stan.dat = datasets[['train']]$data.melt,
                               covariate.cols, run.params, base.dir)
+  gc()
   theta = save.theta(theta.a, theta.h, run.params, delta.new = TRUE)
   theta.row = unlist(theta[1,])
 
