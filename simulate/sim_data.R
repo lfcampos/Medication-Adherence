@@ -30,8 +30,8 @@ Sigma.0 = matrix(c(params[['sig.0']][1]^2, 0, 0, params[['sig.0']][2]^2), nrow =
 beta = matrix(params[['beta']], nrow = 2)
 
 # adherence model
-beta.a = c(0, -0.4)
-sigma.delta = 1.1
+beta.a = c(0.5, -0.4)
+sigma.delta = 2
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Simulate Data
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -66,6 +66,13 @@ dat = replicate(n, {
 #                  Sigma.0 = Sigma.0, T = sample(80:120, 1), beta = beta, I.y = sort(sample(1:T, rpois(1, 2) + 1)))
 # }, simplify = FALSE)
 
+# summarize
+library(rlist)
+c.all = lapply(dat, function(x){ x[['c_t']] } )
+c.all = t(list.cbind(c.all))
+# means
+means = apply(c.all, 1, function(x){ sum(x == 1)/length(x) })
+hist(means)
 
 if(!dir.exists('data')) { dir.create('data') }
 saveRDS(dat, file = 'data/dat.RDS')

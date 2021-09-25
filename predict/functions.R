@@ -101,11 +101,14 @@ get.theta.a.draws = function(theta.a.stan.dat, covariate.cols, run.params, base.
     'divergent' = get_num_divergent(fit)
   )
 
+  remove(fit)
+  gc()
+
   return(theta.a)
 }
 
 #################################
-# get draws of theta b
+# get draws of theta h
 #################################
 
 get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.dir)
@@ -120,14 +123,21 @@ get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.
     options(mc.cores = parallel::detectCores() - 1)
   }
 
+  start.time = Sys.time()
 
   fit = stan(
     file = paste0(base.dir, 'infer/state_space_adherence.stan'),
     data = theta.h.stan.dat,
+    init = initialize.chains.theta.h(),
     iter = run.params[['theta.h.mcmc.length']],
     warmup = run.params[['theta.h.mcmc.length']]/2,
     chains = run.params[['mcmc.chains']]
   )
+
+  end.time = Sys.time()
+
+  total.time = difftime(end.time, start.time, units = 'secs')
+  print(paste('State space model:', round(total.time), 'seconds or', round(total.time/60), 'minutes'))
 
   theta.h = extract(fit)
   dimnames(theta.h$beta) = list('iterations' = seq(1, dim(theta.h$beta)[1]),
@@ -136,6 +146,9 @@ get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.
 
   theta.h$rhat = summary(fit)$summary[,'Rhat']
   theta.h$divergent = get_num_divergent(fit)
+
+  remove(fit)
+  gc()
 
   return(theta.h)
 }
@@ -262,4 +275,52 @@ get.quantiles = function(c.means, p.prior, test.melt)
   ad.quantiles$width.prior.50 = ad.quantiles$upper.prior.50 - ad.quantiles$lower.prior.50
 
   return(ad.quantiles)
+}
+
+#################################
+# inititalize chains for theta h model
+#################################
+
+initialize.chains.theta.h = function()
+{
+  init.params = list(
+    'chain1' = list(
+      'rho' = c(0.01, 0.01),
+      'phi' = c(0, 0),
+      'sigma' = c(0.2, 0.2),
+      'cor' = 0,
+      'sigma_nu' = c(0.2, 0.2),
+      'sigma_0' = c(0.2, 0.2),
+      'beta' = matrix(c(120, 80, 0, 0), nrow = 2, ncol = 2, byrow = TRUE)
+    ),
+    'chain2' = list(
+      'rho' = c(0.5, 0.5),
+      'phi' = c(2, 2),
+      'sigma' = c(0.5, 0.5),
+      'cor' = -0.5,
+      'sigma_nu' = c(0.5, 0.5),
+      'sigma_0' = c(0.5, 0.5),
+      'beta' = matrix(c(120, 80, 1, 1), nrow = 2, ncol = 2, byrow = TRUE)
+    ),
+    'chain3' = list(
+      'rho' = c(0.8, 0.8),
+      'phi' = c(-2, -2),
+      'sigma' = c(1, 1),
+      'cor' = 0.5,
+      'sigma_nu' = c(1, 1),
+      'sigma_0' = c(1, 1),
+      'beta' = matrix(c(120, 80, -1, -1), nrow = 2, ncol = 2, byrow = TRUE)
+    ),
+    'chain4' = list(
+      'rho' = c(0.5, 0.5),
+      'phi' = c(2, -2),
+      'sigma' = c(2, 2),
+      'cor' = 0,
+      'sigma_nu' = c(0.1, 0.1),
+      'sigma_0' = c(2, 2),
+      'beta' = matrix(c(120, 80, 0.2, -3), nrow = 2, ncol = 2, byrow = TRUE)
+    )
+  )
+  
+  return(init.params)
 }

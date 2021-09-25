@@ -20,13 +20,13 @@ data {
 }
 
 parameters {
-  vector<lower=0,upper=1>[2] rho; // autoregressive parameter
-  vector[2] phi;                  // adherence effect
-  vector<lower=0,upper=30>[2] sigma; // measurement error sd: [sd1, sd2]
-  real<lower=-1,upper=1> cor; // measurement error correlation
+  vector<lower=0,upper=1>[2] rho;          // autoregressive parameter
+  vector[2] phi;                           // adherence effect
+  vector<lower=0,upper=30>[2] sigma;       // measurement error sd: [sd1, sd2]
+  real<lower=-1,upper=1> cor;              // measurement error correlation
   vector<lower=0,upper=10>[2] sigma_nu;    // innovation variance scalings
   vector<lower=0,upper=30>[2] sigma_0;     // innitial state variance scalings
-  matrix[J,2] beta;               // covariate effect matrix
+  matrix[J,2] beta;                        // covariate effect matrix
 }
 
 
@@ -41,20 +41,25 @@ model {
   //            Priors             //
   // // // // // // // // // // // //
   for (i in 1:2){
-    rho[i] ~ beta(3,1);       //auto-correlation
-    phi[i] ~ normal(0,5);     //daily adherence effect
-    sigma[i] ~ uniform(0,30); //measurement error standard deviation
-    sigma_nu[i] ~ uniform(0,10); //innovation standard deviation
-    sigma_0[i] ~ uniform(0,30);  //initial random effect standard deviation
+    rho[i] ~ beta(3,1);            // auto-correlation
+    phi[i] ~ normal(0,5);          // daily adherence effect
+
+    sigma[i] ~ uniform(0,30);      // measurement error standard deviation
+    sigma_nu[i] ~ uniform(0,10);   // innovation standard deviation
+    sigma_0[i] ~ uniform(0,30);    // initial random effect standard deviation
+
+    //sigma[i] ~ cauchy(0,5);      // measurement error standard deviation
+    //sigma_nu[i] ~ cauchy(0,2.5); // innovation standard deviation
+    //sigma_0[i] ~ cauchy(0,5);    // initial random effect standard deviation
   }
-  cor ~ uniform(-1, 1);        // measurement error correlation
+  cor ~ uniform(-1, 1);            // measurement error correlation
 
   for (j in 1:J){
     if(j == 1){
-      beta[j,1] ~ normal(120, 20); //intercept for SBP
-      beta[j,2] ~ normal(80, 20);  //intercept for DBP
+      beta[j,1] ~ normal(120, 20); // intercept for SBP
+      beta[j,2] ~ normal(80, 20);  // intercept for DBP
     }else{
-      beta[j,1] ~ normal(0, 20);   //coefficients
+      beta[j,1] ~ normal(0, 20);   // coefficients
       beta[j,2] ~ normal(0, 20);
     }
   }

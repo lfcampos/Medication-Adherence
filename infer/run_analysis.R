@@ -35,7 +35,55 @@ adherence_dat = arrange.SS_stan(dat, is.sim = TRUE)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Run analysis using STAN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-fit <- stan(file = 'infer/state_space_adherence.stan', data = adherence_dat, iter = 600, chains = 3)
+
+init.params = list(
+  'chain1' = list(
+    'rho' = c(0.01, 0.01),
+    'phi' = c(0, 0),
+    'sigma' = c(0.2, 0.2),
+    'cor' = 0,
+    'sigma_nu' = c(0.2, 0.2),
+    'sigma_0' = c(0.2, 0.2),
+    'beta' = matrix(c(120, 80, 0, 0), nrow = 2, ncol = 2, byrow = TRUE)
+  ),
+  'chain2' = list(
+    'rho' = c(0.5, 0.5),
+    'phi' = c(2, 2),
+    'sigma' = c(0.5, 0.5),
+    'cor' = -0.5,
+    'sigma_nu' = c(0.5, 0.5),
+    'sigma_0' = c(0.5, 0.5),
+    'beta' = matrix(c(120, 80, 1, 1), nrow = 2, ncol = 2, byrow = TRUE)
+  ),
+  'chain3' = list(
+    'rho' = c(0.8, 0.8),
+    'phi' = c(-2, -2),
+    'sigma' = c(1, 1),
+    'cor' = 0.5,
+    'sigma_nu' = c(1, 1),
+    'sigma_0' = c(1, 1),
+    'beta' = matrix(c(120, 80, -1, -1), nrow = 2, ncol = 2, byrow = TRUE)
+  ),
+  'chain4' = list(
+    'rho' = c(0.5, 0.5),
+    'phi' = c(2, -2),
+    'sigma' = c(2, 2),
+    'cor' = 0,
+    'sigma_nu' = c(0.1, 0.1),
+    'sigma_0' = c(2, 2),
+    'beta' = matrix(c(120, 80, 0.2, -3), nrow = 2, ncol = 2, byrow = TRUE)
+  )
+)
+
+
+fit <- stan(
+  file = 'infer/state_space_adherence.stan',
+  data = adherence_dat,
+  init = init.params,
+  iter = 50,
+  chains = 3
+)
+
 ex <- extract(fit)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
