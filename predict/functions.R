@@ -124,11 +124,13 @@ get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.
   }
 
   start.time = Sys.time()
+  
+  init.params = initialize.chains.theta.h()
 
   fit = stan(
     file = paste0(base.dir, 'infer/state_space_adherence.stan'),
     data = theta.h.stan.dat,
-    init = initialize.chains.theta.h(),
+    init = init.params,
     iter = run.params[['theta.h.mcmc.length']],
     warmup = run.params[['theta.h.mcmc.length']]/2,
     chains = run.params[['mcmc.chains']]
