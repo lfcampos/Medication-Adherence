@@ -342,6 +342,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
   theta.a.divergent = rep(NA, run.params[['npf']])
   theta.h.divergent = rep(NA, run.params[['npf']])
+  theta.h.model.times = rep(NA, run.params[['npf']])
 
   for(e in 1:run.params[['npf']])
   {
@@ -442,6 +443,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
       theta.a.divergent[e] = theta.a[['divergent']]
       theta.h.divergent[e] = theta.h[['divergent']]
+      theta.h.model.times[e] = theta.h[['model.time']]
     } else
     {
       c.star.pf = c.star[,e,]
@@ -478,6 +480,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
       theta.a.divergent[e] = theta.a[['divergent']]
       theta.h.divergent[e] = theta.h[['divergent']]
+      theta.h.model.times[e] = theta.h[['model.time']]
     }
 
     theta.row = unlist(theta.iter[1,])
@@ -516,7 +519,8 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
       'theta.a.rhat' = theta.a.rhat[,1:e, drop = FALSE],
       'theta.h.rhat' = theta.h.rhat[,1:e, drop = FALSE],
       'theta.a.divergent' = theta.a.divergent[1:e],
-      'theta.h.divergent' = theta.h.divergent[1:e]
+      'theta.h.divergent' = theta.h.divergent[1:e],
+      'theta.h.model.times' = theta.h.model.times
     )
     saveRDS(draws, file = paste0(run.dir, 'draws_onestep.rds'))
     remove(c.star.means.iter, c.means.iter, p.prior.iter, ess.iter, draws)
@@ -535,7 +539,8 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
   return(list(c.star.means = c.star.means, p.prior = p.prior.all, ess = ess, theta = theta.all,
               theta.a.rhat = theta.a.rhat, theta.h.rhat = theta.h.rhat,
-              theta.a.divergent = theta.a.divergent, theta.h.divergent = theta.h.divergent))
+              theta.a.divergent = theta.a.divergent, theta.h.divergent = theta.h.divergent,
+              theta.h.model.times = theta.h.model.times))
 }
 
 #################################
@@ -647,8 +652,12 @@ draw.c.star.onestep = function(datasets, run.params, base.dir)
     'id' = unique(datasets$data.melt$id),
     'pf.id' = seq(1, run.params[['npf']] - run.params[['burnin']])
   )
-
-
+  
+  # summarize state space runtime
+  print('---------------------------------------------------------------------------------------------')
+  print(paste('Average SSM time:', round(mean(post.output$theta.h.model.times)/60), 'minutes'))
+  print('---------------------------------------------------------------------------------------------')
+  
   return(list(
     'c.means' = c.star.mean,
     'p.prior' = p.prior,

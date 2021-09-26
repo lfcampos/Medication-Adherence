@@ -148,6 +148,7 @@ get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.
 
   theta.h$rhat = summary(fit)$summary[,'Rhat']
   theta.h$divergent = get_num_divergent(fit)
+  theta.h$model.time = difftime(end.time, start.time, units = 'secs')
 
   remove(fit)
   gc()
