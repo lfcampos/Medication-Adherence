@@ -635,8 +635,15 @@ draw.c.star.onestep = function(datasets, run.params, base.dir)
   theta.a = get.theta.a.draws(theta.a.stan.dat = datasets[['train']]$data.melt,
                               covariate.cols, run.params, base.dir)
   gc()
-  theta = save.theta(theta.a, theta.h, run.params, delta.new = TRUE)
-  theta.row = unlist(theta[1,])
+  if(run.params[['use.post.mean']])
+  {
+    theta = save.theta.means(theta.a, theta.h, run.params, delta.new = TRUE)
+    theta.row = unlist(theta)
+  } else
+  {
+    theta = save.theta.draws(theta.a, theta.h, run.params, delta.new = TRUE)
+    theta.row = unlist(theta[1,])
+  }
 
   remove(theta, theta.h, theta.a, covariate.cols)
   gc()
@@ -652,12 +659,12 @@ draw.c.star.onestep = function(datasets, run.params, base.dir)
     'id' = unique(datasets$data.melt$id),
     'pf.id' = seq(1, run.params[['npf']] - run.params[['burnin']])
   )
-  
+
   # summarize state space runtime
   print('---------------------------------------------------------------------------------------------')
   print(paste('Average SSM time:', round(mean(post.output$theta.h.model.times)/60), 'minutes'))
   print('---------------------------------------------------------------------------------------------')
-  
+
   return(list(
     'c.means' = c.star.mean,
     'p.prior' = p.prior,
