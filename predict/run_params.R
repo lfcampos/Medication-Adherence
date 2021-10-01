@@ -23,25 +23,27 @@ run.params[['cloud']] = FALSE
 ########################################################################
 # number of iterations etc
 ########################################################################
+# use posterior mean
+run.params[['use.post.mean']] = TRUE
 # number of posterior samples from training model
 # corresponds to "f" in manuscript
 run.params[['npostsamp']] = 1
 # number of patients to predict adherence for. We have
 # 503 total, and 400 are fixed in the training set
-run.params[['train.size']] = 30
-run.params[['test.size']] = 10
+run.params[['train.size']] = 20
+run.params[['test.size']] = 5
 # number of particles
 # 'P' in manuscript
 run.params[['nparticles']] = 8
 # number of particle filter iterations
 # corresponds to "e" in manuscript
-run.params[['npf']] = 1
+run.params[['npf']] = 2
 # particle filter burnin
 run.params[['burnin']] = round(run.params[['npf']]/5)
 # MCMC length
 run.params[['mcmc.chains']] = 2
-run.params[['theta.h.mcmc.length']] = 500
-run.params[['theta.a.mcmc.length']] = 500
+run.params[['theta.h.mcmc.length']] = 100
+run.params[['theta.a.mcmc.length']] = 100
 ########################################################################
 
 if(run.params[['test.code']])
