@@ -426,8 +426,17 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
       theta.h = get.theta.h.draws(theta_h_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
       theta.a = get.theta.a.draws(theta_a_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
-      theta.iter = save.theta(theta.a, theta.h, run.params, delta.new = TRUE)
-
+      
+      if(run.params[['use.post.mean']])
+      {
+        theta.iter = save.theta.means(theta.a, theta.h, run.params, delta.new = TRUE)
+        theta.row = unlist(theta.iter)
+      } else
+      {
+        theta.iter = save.theta.draws(theta.a, theta.h, run.params, delta.new = TRUE)
+        theta.row = unlist(theta.iter[1,])
+      }
+      
       theta.h.rhat[,e] = theta.h$rhat
       rownames(theta.h.rhat) = names(theta.h$rhat)
 
@@ -463,7 +472,16 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
       theta.h = get.theta.h.draws(theta_b_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
       theta.a = get.theta.a.draws(theta_a_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
-      theta.iter = save.theta(theta.a, theta.h, run.params, delta.new = FALSE)
+      
+      if(run.params[['use.post.mean']])
+      {
+        theta.iter = save.theta.means(theta.a, theta.h, run.params, delta.new = FALSE)
+        theta.row = unlist(theta.iter)
+      } else
+      {
+        theta.iter = save.theta.draws(theta.a, theta.h, run.params, delta.new = FALSE)
+        theta.row = unlist(theta.iter[1,])
+      }
 
       theta.h.rhat[,e] = theta.h$rhat
       rownames(theta.h.rhat) = names(theta.h$rhat)
@@ -483,7 +501,6 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
       theta.h.model.times[e] = theta.h[['model.time']]
     }
 
-    theta.row = unlist(theta.iter[1,])
     theta.all[,e] = theta.row
 
     remove(theta_a_stan_dat, theta_h_stan_dat)
