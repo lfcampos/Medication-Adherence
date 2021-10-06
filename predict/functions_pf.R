@@ -281,7 +281,8 @@ post.samp.draw.pf = function(theta.row, datasets, run.params, base.dir)
       print(paste('Expected total run time:', round( (run.params[['npf']]*difftime(time.end.pf, time.start.pf, units = 'secs')[[1]])/60), 'minutes'))
     } else if (e > 2)
     {
-      print(paste('Elapsed time:', round(difftime(time.end.pf, time.start.pf, units = 'secs')[[1]], 2), 'seconds'))
+      time.elapsed = difftime(time.end.pf, time.start.pf, units = 'secs')[[1]]
+      print(paste('Elapsed time:', round(time.elapsed), 'seconds or', round(time.elapsed/60), 'minutes or', round(time.elapsed/(60*60)), 'hours'))
     }
     print('---------------------------------------------------------------------------------------------')
   }
@@ -426,7 +427,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
       theta.h = get.theta.h.draws(theta_h_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
       theta.a = get.theta.a.draws(theta_a_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
-      
+
       if(run.params[['use.post.mean']])
       {
         theta.iter = save.theta.means(theta.a, theta.h, run.params, delta.new = TRUE)
@@ -436,7 +437,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
         theta.iter = save.theta.draws(theta.a, theta.h, run.params, delta.new = TRUE)
         theta.row = unlist(theta.iter[1,])
       }
-      
+
       theta.h.rhat[,e] = theta.h$rhat
       rownames(theta.h.rhat) = names(theta.h$rhat)
 
@@ -472,7 +473,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
 
       theta.h = get.theta.h.draws(theta_b_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
       theta.a = get.theta.a.draws(theta_a_stan_dat, covariate.cols = datasets$full[['covariate.cols']], run.params, base.dir)
-      
+
       if(run.params[['use.post.mean']])
       {
         theta.iter = save.theta.means(theta.a, theta.h, run.params, delta.new = FALSE)

@@ -254,6 +254,7 @@ save.theta.means = function(theta.a, theta.h, run.params, delta.new = TRUE)
   }
 
   params = cbind(params.b, params.a)
+  names(params)[1:18] = names(theta.true.params)
   return(params)
 }
 
@@ -379,3 +380,25 @@ initialize.chains.theta.h = function()
 
   return(init.params)
 }
+
+
+theta.true.params = c(
+  'rho.s' = 0.8,
+  'rho.d' = 0.2,
+  'phi.s' = 0.5,
+  'phi.d' = 0.7,
+  'sigma.s.eps' = 2.75,
+  'sigma.d.eps' = 2.2,
+  'rho.eps' = 0.55,
+  'sigma.s.nu' = 1,
+  'sigma.d.nu' = 0.8,
+  'sigma.s.0' = 1.5,
+  'sigma.d.0' = 1.3,
+  'beta.s.intercept.sbp' = 120,
+  'beta.s.gender.sbp' = -1.2,
+  'beta.d.intercept.dbp' = 80,
+  'beta.d.gender.dbp' = -1.2,
+  'beta.a.intercept' = 0,
+  'beta.a.gender' = -0.4,
+  'sigma.delta' = 1.1
+)
