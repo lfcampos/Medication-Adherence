@@ -542,6 +542,7 @@ post.samp.draw.pf.onestep = function(theta.row, datasets, run.params, base.dir)
     )
     saveRDS(draws, file = paste0(run.dir, 'draws_onestep.rds'))
     remove(c.star.means.iter, c.means.iter, p.prior.iter, ess.iter, draws)
+    summary(warnings())
     gc()
   }
 
