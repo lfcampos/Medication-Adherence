@@ -113,7 +113,8 @@ get.theta.a.draws = function(theta.a.stan.dat, covariate.cols, run.params, base.
 # get draws of theta h
 #################################
 
-get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.dir)
+get.theta.h.draws = function(theta.h.stan.dat, covariate.cols,
+                             run.params, base.dir)
 {
   rstan_options(auto_write = TRUE)
 
@@ -127,16 +128,28 @@ get.theta.h.draws = function(theta.h.stan.dat, covariate.cols, run.params, base.
 
   start.time = Sys.time()
 
-  init.params = initialize.chains.theta.h()
+  if(run.params[['theta.h.fixed.init']])
+  {
+    init.params = initialize.chains.theta.h()
 
-  fit = stan(
-    file = paste0(base.dir, 'infer/state_space_adherence.stan'),
-    data = theta.h.stan.dat,
-    init = init.params,
-    iter = run.params[['theta.h.mcmc.length']],
-    warmup = run.params[['theta.h.mcmc.length']]/2,
-    chains = run.params[['mcmc.chains']]
-  )
+    fit = stan(
+      file = paste0(base.dir, 'infer/state_space_adherence.stan'),
+      data = theta.h.stan.dat,
+      init = init.params,
+      iter = run.params[['theta.h.mcmc.length']],
+      warmup = run.params[['theta.h.mcmc.length']]/2,
+      chains = run.params[['mcmc.chains']]
+    )
+  } else
+  {
+    fit = stan(
+      file = paste0(base.dir, 'infer/state_space_adherence.stan'),
+      data = theta.h.stan.dat,
+      iter = run.params[['theta.h.mcmc.length']],
+      warmup = run.params[['theta.h.mcmc.length']]/2,
+      chains = run.params[['mcmc.chains']]
+    )
+  }
 
   end.time = Sys.time()
 

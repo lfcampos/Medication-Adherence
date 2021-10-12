@@ -44,6 +44,7 @@ run.params[['burnin']] = round(run.params[['npf']]/5)
 run.params[['mcmc.chains']] = 2
 run.params[['theta.h.mcmc.length']] = 100
 run.params[['theta.a.mcmc.length']] = 100
+run.params[['theta.h.fixed.init']] = TRUE
 ########################################################################
 
 if(run.params[['test.code']])
