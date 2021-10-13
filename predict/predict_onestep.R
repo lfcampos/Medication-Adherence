@@ -21,6 +21,7 @@
 # CHANGE THIS to github repo directory
 ########################################################
 base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
+old.run.dir = 'run_20211007_1825'
 # base.dir = '/n/home01/khunter33/Medication-Adherence/'
 
 # source necessary files
@@ -28,7 +29,7 @@ predict.dir = paste(base.dir, 'predict/', sep = '')
 source(paste(predict.dir, 'setup.R', sep = ''))
 run.dir = base.setup(base.dir)
 
-predict.adherence = function()
+predict.adherence = function(old.run.dir)
 {
   # setup the data and parameters
   setup.output = setup.all(base.dir, run.dir, onestep = TRUE)
@@ -39,7 +40,7 @@ predict.adherence = function()
   gc()
 
   # predict adherence
-  predict.draws = draw.c.star.onestep(datasets, run.params, base.dir)
+  predict.draws = draw.c.star.onestep(datasets, run.params, base.dir, old.run.dir)
 
   return(predict.draws)
 }

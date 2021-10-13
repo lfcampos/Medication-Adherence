@@ -643,29 +643,37 @@ draw.c.star = function(datasets, theta, run.params, base.dir, cl = NULL)
 # one-step procedure
 #################################
 
-draw.c.star.onestep = function(datasets, run.params, base.dir)
+draw.c.star.onestep = function(datasets, run.params, base.dir, old.run.dir)
 {
-  # begin with a warm start: initial draw of theta parameters
-  covariate.cols = datasets[['train']][['covariate.cols']]
-
-  theta.h = get.theta.h.draws(theta.h.stan.dat = datasets[['train']]$data.stan,
-                              covariate.cols, run.params, base.dir)
-  gc()
-  theta.a = get.theta.a.draws(theta.a.stan.dat = datasets[['train']]$data.melt,
-                              covariate.cols, run.params, base.dir)
-  gc()
-  if(run.params[['use.post.mean']])
+  # read in previous data
+  if(!is.null(old.run.dir))
   {
-    theta = save.theta.means(theta.a, theta.h, run.params, delta.new = TRUE)
-    theta.row = unlist(theta)
+    draws = readRDS(paste0(base.dir, 'predict/out/', old.run.dir, '/draws_onestep.rds'))
+    theta.row = unlist(draws$theta[,1])
   } else
   {
-    theta = save.theta.draws(theta.a, theta.h, run.params, delta.new = TRUE)
-    theta.row = unlist(theta[1,])
-  }
+    # begin with a warm start: initial draw of theta parameters
+    covariate.cols = datasets[['train']][['covariate.cols']]
 
-  remove(theta, theta.h, theta.a, covariate.cols)
-  gc()
+    theta.h = get.theta.h.draws(theta.h.stan.dat = datasets[['train']]$data.stan,
+                                covariate.cols, run.params, base.dir)
+    gc()
+    theta.a = get.theta.a.draws(theta.a.stan.dat = datasets[['train']]$data.melt,
+                                covariate.cols, run.params, base.dir)
+    gc()
+    if(run.params[['use.post.mean']])
+    {
+      theta = save.theta.means(theta.a, theta.h, run.params, delta.new = TRUE)
+      theta.row = unlist(theta)
+    } else
+    {
+      theta = save.theta.draws(theta.a, theta.h, run.params, delta.new = TRUE)
+      theta.row = unlist(theta[1,])
+    }
+
+    remove(theta, theta.h, theta.a, covariate.cols)
+    gc()
+  }
 
   # draw posterior samples
   post.output = post.samp.draw.pf.onestep(theta.row, datasets, run.params, base.dir)

@@ -381,7 +381,7 @@ initialize.chains.theta.h = function()
       'beta' = matrix(c(120, 80, -1, -1), nrow = 2, ncol = 2, byrow = TRUE)
     ),
     'chain4' = list(
-      'rho' = c(0.5, 0.5),
+      'rho' = c(0.2, 0.2),
       'phi' = c(2, -2),
       'sigma' = c(2, 2),
       'cor' = 0,
