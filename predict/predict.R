@@ -42,7 +42,7 @@ predict.adherence = function()
   } else
   {
     # initiate cluster
-    num.cores = ifelse(run.params[['odyssey']], detectCores(), detectCores() - 1)
+    num.cores = ifelse(run.params[['cloud']], detectCores(), detectCores() - 1)
     outfile = paste(run.dir, 'out.txt', sep = '')
     cl = makeCluster(num.cores, outfile = outfile)
   }
@@ -63,7 +63,7 @@ predict.adherence = function()
     run.params, base.dir
   )
   save(theta.a, file = paste(run.dir, 'theta_a.RData', sep = ''))
-  theta = save.theta(theta.a, theta.h, run.params)
+  theta = save.theta.draws(theta.a, theta.h, run.params)
 
   ################################################
   # predictions of adherence
