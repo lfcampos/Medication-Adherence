@@ -22,7 +22,13 @@ library(rstan)
 rstan_options(auto_write = FALSE)
 options(mc.cores = parallel::detectCores() - 1)
 
-setwd('/Users/khunter/Dropbox/Medication-Adherence')
+n.train = 70
+n.test = 30
+n.iter = 8000
+n.chains = 4
+
+# setwd('/Users/khunter/Dropbox/Medication-Adherence')
+setwd('/n/home01/khunter33/Medication-Adherence/')
 source('infer/state_space_functions.R')
 source('infer/stan_functions.R')
 
@@ -30,13 +36,22 @@ source('infer/stan_functions.R')
 # Read in and reformat the data to a form needed for STAN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 dat <- readRDS(file = 'data/dat.RDS')
-adherence_dat = arrange.SS_stan(dat, is.sim = TRUE)
+
+# sample down
+set.seed(100)
+ids <- 1:length(dat)
+train.ids <- sample(ids, n.train)
+test.ids <- sample(ids[!(ids %in% train.ids)], n.test)
+all.ids <- c(train.ids, test.ids)
+dat <- dat[all.ids]
+
+adherence_dat <- arrange.SS_stan(dat, is.sim = TRUE)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Run analysis using STAN
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-init.params = list(
+init.params <- list(
   'chain1' = list(
     'rho' = c(0.01, 0.01),
     'phi' = c(0, 0),
@@ -65,7 +80,7 @@ init.params = list(
     'beta' = matrix(c(120, 80, -1, -1), nrow = 2, ncol = 2, byrow = TRUE)
   ),
   'chain4' = list(
-    'rho' = c(0.5, 0.5),
+    'rho' = c(0.2, 0.2),
     'phi' = c(2, -2),
     'sigma' = c(2, 2),
     'cor' = 0,
@@ -80,8 +95,8 @@ fit <- stan(
   file = 'infer/state_space_adherence.stan',
   data = adherence_dat,
   init = init.params,
-  iter = 50,
-  chains = 3
+  iter = n.iter,
+  chains = n.chains
 )
 
 ex <- extract(fit)
@@ -91,5 +106,5 @@ ex <- extract(fit)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 saveRDS(ex, file = 'data/stan_fit.RDS')
-covariate.cols = c('gender')
+covariate.cols <- c('gender')
 saveRDS(covariate.cols, file = 'data/covariate_cols.RDS')
