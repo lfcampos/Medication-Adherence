@@ -11,7 +11,7 @@
 #SBATCH --mail-user=kristenbhunter@gmail.com 					# Email
 
 source new-modules.sh
-module load gcc/7.1.0-fasrc01
+module load gcc/8.2.0-fasrc01
 module load R/4.1.0-fasrc01
 export R_LIBS_USER=$HOME/apps/R:$R_LIBS_USER
 R CMD BATCH --quiet --no-restore --no-save /n/home01/khunter33/Medication-Adherence/predict/predict.R /n/home01/khunter33/Medication-Adherence/log/predict_$(date +"%Y%m%d_%H%M").out
