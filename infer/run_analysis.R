@@ -24,11 +24,11 @@ options(mc.cores = parallel::detectCores() - 1)
 
 n.train = 70
 n.test = 30
-n.iter = 8000
-n.chains = 4
+n.iter = 80
+n.chains = 2
 
-# setwd('/Users/khunter/Dropbox/Medication-Adherence')
-setwd('/n/home01/khunter33/Medication-Adherence/')
+setwd('/Users/khunter/Dropbox/Medication-Adherence')
+# setwd('/n/home01/khunter33/Medication-Adherence/')
 source('infer/state_space_functions.R')
 source('infer/stan_functions.R')
 
@@ -59,7 +59,7 @@ init.params <- list(
     'cor' = 0,
     'sigma_nu' = c(0.2, 0.2),
     'sigma_0' = c(0.2, 0.2),
-    'beta' = matrix(c(120, 80, 0, 0), nrow = 2, ncol = 2, byrow = TRUE)
+    'beta' = matrix(c(120, 80, 0, 0, 0, 0), nrow = 3, ncol = 2, byrow = TRUE)
   ),
   'chain2' = list(
     'rho' = c(0.5, 0.5),
@@ -68,7 +68,7 @@ init.params <- list(
     'cor' = -0.5,
     'sigma_nu' = c(0.5, 0.5),
     'sigma_0' = c(0.5, 0.5),
-    'beta' = matrix(c(120, 80, 1, 1), nrow = 2, ncol = 2, byrow = TRUE)
+    'beta' = matrix(c(120, 80, 1, 1, 1, 1), nrow = 3, ncol = 2, byrow = TRUE)
   ),
   'chain3' = list(
     'rho' = c(0.8, 0.8),
@@ -77,7 +77,7 @@ init.params <- list(
     'cor' = 0.5,
     'sigma_nu' = c(1, 1),
     'sigma_0' = c(1, 1),
-    'beta' = matrix(c(120, 80, -1, -1), nrow = 2, ncol = 2, byrow = TRUE)
+    'beta' = matrix(c(120, 80, -1, -1, -1, -1), nrow = 3, ncol = 2, byrow = TRUE)
   ),
   'chain4' = list(
     'rho' = c(0.2, 0.2),
@@ -86,7 +86,7 @@ init.params <- list(
     'cor' = 0,
     'sigma_nu' = c(0.1, 0.1),
     'sigma_0' = c(2, 2),
-    'beta' = matrix(c(120, 80, 0.2, -3), nrow = 2, ncol = 2, byrow = TRUE)
+    'beta' = matrix(c(120, 80, 0.2, -3, 3, -0.2), nrow = 3, ncol = 2, byrow = TRUE)
   )
 )
 

@@ -121,7 +121,7 @@ mu_T = function(T, x, c_t, rho, phi, sig.nu, sig.BP, sig0, beta){
 			alpha_mu[t] = phi*sum(c_t[t:2,1]*rho^(t-t:2))
 		}
 	}
-	mu = sum(x*beta) + alpha_mu
+	mu = sum(x * beta) + alpha_mu
 	mu
 }
 

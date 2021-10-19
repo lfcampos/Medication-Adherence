@@ -31,12 +31,12 @@ simulate.SS_2D = function(T, rho, phi, Sigma.nu, Sigma.BP, Sigma.0, beta,
                           sigma.delta, beta.a,
                           c_t = NULL, n.obs = NULL, I.y = NULL){
 
-  # Make binary x vector the length of beta with intercept
-  x = c(1, sample(c(0, 1), nrow(beta) - 1, replace = TRUE))
+  # simulate covariates
+  x = c(1, sample(c(0, 1), 1), rnorm(1))
 
   # simulate adherence
   delta = rnorm(1, 0, sigma.delta)
-  eta = delta + x[1] * beta.a[1] + x[2] * beta.a[2]
+  eta = delta + x[1] * beta.a[1] + x[2] * beta.a[2] + x[3] * beta.a[3]
   p = exp(eta)/(1 + exp(eta))
   if(is.null(c_t)) c_t = matrix(2*rbinom(T, 1, p) - 1, T, 1)
 
@@ -67,3 +67,5 @@ simulate.SS_2D = function(T, rho, phi, Sigma.nu, Sigma.BP, Sigma.0, beta,
 
   return(list(T = T, c_t = c_t, y1 = y1, y2 = y2, x = x, I.y = I.y, missing = missing))
 }
+
+covariate.cols = c('gender', 'age')
