@@ -29,8 +29,6 @@ parameters {
   matrix[J,2] beta;                        // covariate effect matrix
 }
 
-
-
 model {
   int pos;
   vector[2*n] alpha;
@@ -44,13 +42,9 @@ model {
     rho[i] ~ beta(3,1);            // auto-correlation
     phi[i] ~ normal(0,5);          // daily adherence effect
 
-    sigma[i] ~ uniform(0,30);      // measurement error standard deviation
-    sigma_nu[i] ~ uniform(0,10);   // innovation standard deviation
-    sigma_0[i] ~ uniform(0,30);    // initial random effect standard deviation
-
-    //sigma[i] ~ cauchy(0,5);      // measurement error standard deviation
-    //sigma_nu[i] ~ cauchy(0,2.5); // innovation standard deviation
-    //sigma_0[i] ~ cauchy(0,5);    // initial random effect standard deviation
+    sigma[i] ~ cauchy(0,5);      // measurement error standard deviation
+    sigma_nu[i] ~ cauchy(0,2.5); // innovation standard deviation
+    sigma_0[i] ~ cauchy(0,5);    // initial random effect standard deviation
   }
   cor ~ uniform(-1, 1);            // measurement error correlation
 
