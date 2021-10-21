@@ -55,24 +55,39 @@ standard.legend = function(point.data)
 # create interval plot
 #################################
 
-gen.interval.plot = function(coverage.data, point.data, title)
+gen.interval.plot = function(coverage.data, point.data, title, square.dots = FALSE)
 {
   # coverage.data = plot.data[['coverage.data']]; point.data = plot.data[['point.data']];
 
   legend = standard.legend(point.data)
 
-  interval.plot = ggplot(coverage.data, aes(x = value, y = factor(id), color = cover)) +
-    geom_line(size = 2.5) +
-    geom_point(data = point.data, aes(x = value, shape = factor(variable)), size = 5) +
-    legend[[1]] + legend[[2]] +
-    ylab('Patient') +
-    xlab('Predicted percent adherence') +
-    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
-    ggtitle(title) +
-    theme(text = element_text(size = 20)) +
-    theme(plot.title = element_text(size = 20)) +
-    xlim(0, 1)
-
+  if(square.dots)
+  {
+    interval.plot = ggplot(coverage.data, aes(x = value, y = factor(id), color = cover)) +
+      geom_line(size = 2.5) +
+      geom_point(data = point.data, aes(x = value, shape = factor(variable)), size = 5) +
+      legend[[1]] + legend[[2]] +
+      ylab('Patient') +
+      xlab('Predicted percent adherence') +
+      theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+      ggtitle(title) +
+      theme(text = element_text(size = 20)) +
+      theme(plot.title = element_text(size = 20)) +
+      xlim(0, 1)
+  } else
+  {
+    interval.plot = ggplot(coverage.data, aes(x = value, y = factor(id), color = cover)) +
+      geom_line(size = 2.5) +
+      geom_point(data = point.data, aes(x = value), size = 5) +
+      legend[[1]] +
+      ylab('Patient') +
+      xlab('Predicted percent adherence') +
+      theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+      ggtitle(title) +
+      theme(text = element_text(size = 20)) +
+      theme(plot.title = element_text(size = 20)) +
+      xlim(0, 1)
+  }
   return(interval.plot)
 }
 
@@ -81,7 +96,7 @@ gen.interval.plot = function(coverage.data, point.data, title)
 #################################
 
 # take in expected coverage
-create.plot.data = function(ad.quantiles, exp.coverage, type = 'bp')
+create.plot.data = function(ad.quantiles, exp.coverage, type = 'bp', square.dots = FALSE)
 {
   # type = 'bp'
   # type = 'ad'
@@ -108,9 +123,17 @@ create.plot.data = function(ad.quantiles, exp.coverage, type = 'bp')
   coverage.data = melt(ad.quantiles[ ,c(id.vars, vars)], id.vars)
   colnames(coverage.data) = colnames
 
-  # point data
-  point.data = melt(ad.quantiles[ ,c(id.vars, 'prior.mean', 'padhere')], id.vars)
-  colnames(point.data)= colnames
+  if(!square.dots)
+  {
+    # point data
+    point.data = melt(ad.quantiles[ ,c(id.vars, 'padhere')], id.vars)
+    colnames(point.data) = colnames
+  } else
+  {
+    # point data
+    point.data = melt(ad.quantiles[ ,c(id.vars, 'prior.mean', 'padhere')], id.vars)
+    colnames(point.data) = colnames
+  }
 
   return(list(point.data = point.data, coverage.data = coverage.data))
 }
@@ -138,7 +161,8 @@ plot.coverage = function(ad.quantiles,
                          sim.params,
                          exp.coverage = 0.95,
                          sample.size = 25,
-                         type = 'bp')
+                         type = 'bp',
+                         square.dots = FALSE)
 {
   # sample.size = 25; exp.coverage = 0.95; type = 'bp';
 
@@ -158,12 +182,14 @@ plot.coverage = function(ad.quantiles,
   id.sample = sample(unique(ad.quantiles$id), sample.size.min)
   ad.quantiles = ad.quantiles[ad.quantiles$id %in% id.sample,]
 
-  plot.data = create.plot.data(ad.quantiles, exp.coverage, type = type)
+  plot.data = create.plot.data(ad.quantiles, exp.coverage, type = type,
+                               square.dots = square.dots)
 
   interval.plot = gen.interval.plot(
     coverage.data = plot.data[['coverage.data']],
     point.data = plot.data[['point.data']],
-    title = title
+    title = title,
+    square.dots = square.dots
   )
 
   return(interval.plot)

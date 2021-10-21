@@ -20,9 +20,9 @@
 ########################################################
 # CHANGE THIS to github repo directory
 ########################################################
-base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
-old.run.dir = 'run_20211007_1825'
-# base.dir = '/n/home01/khunter33/Medication-Adherence/'
+# base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
+# old.run.dir = 'run_20211007_1825'
+base.dir = '/n/home01/khunter33/Medication-Adherence/'
 
 # source necessary files
 predict.dir = paste(base.dir, 'predict/', sep = '')

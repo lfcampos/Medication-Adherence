@@ -22,6 +22,7 @@
 ########################################################
 # base.dir = '/Users/khunter/Dropbox/archive/Medication-Adherence/'
 base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
+# base.dir = '/n/home01/khunter33/Medication-Adherence/'
 
 # source necessary files
 predict.dir = paste(base.dir, 'predict/', sep = '')
@@ -62,7 +63,7 @@ predict.adherence = function()
     covariate.cols = datasets[['train']][['covariate.cols']],
     run.params, base.dir
   )
-  save(theta.a, file = paste(run.dir, 'theta_a.RData', sep = ''))
+  saveRDS(theta.a, file = paste(run.dir, 'theta_a.rds', sep = ''))
   theta = save.theta.draws(theta.a, theta.h, run.params)
 
   ################################################
@@ -86,4 +87,4 @@ predict.adherence = function()
 ################################################
 draws = predict.adherence()
 # save out data
-saveRDS(draws, file = paste(run.dir, 'draws.rds', sep = ''))
+saveRDS(draws, file = paste(run.dir, 'draws_twostep.rds', sep = ''))

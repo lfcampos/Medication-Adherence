@@ -19,7 +19,7 @@ n.obs = 10
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 params = list(
   rho = c(0.8, 0.9), phi = c(0.5,0.7), sig = c(2.75, 2.2),
-  sig.nu = c(1, 0.8),  sig.0 = c(1.5, 1.3), beta = c(120, -1.2, 0.6, 80, -1.2, -0.3), cor = 0.55
+  sig.nu = c(1, 0.8),  sig.0 = c(1.5, 1.3), beta = c(120, -1.2, 0.8, 80, -1.2, -0.7), cor = 0.55
 )
 Sigma.BP = matrix(
   c(params[['sig']][1]^2, params[['cor']]*params[['sig']][1]*params[['sig']][2],
@@ -30,8 +30,8 @@ Sigma.0 = matrix(c(params[['sig.0']][1]^2, 0, 0, params[['sig.0']][2]^2), nrow =
 beta = matrix(params[['beta']], nrow = 3)
 
 # adherence model
-beta.a = c(0.5, -0.4, 0.6)
-sigma.delta = 1.2
+beta.a = c(1.2, -0.7, 0.6)
+sigma.delta = 0.6
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Simulate Data
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #

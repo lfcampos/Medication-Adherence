@@ -55,12 +55,12 @@ base.setup = function(base.dir)
   # create a unique directory for each simulation run based on timestamp
   Sys.setenv(TZ = 'America/New_york')
   time.start = Sys.time()
-  run = format(time.start, format = '%Y%m%d_%H')
+  run = format(time.start, format = '%Y%m%d_%H%M')
   run.dir = paste(out.dir, 'run_', run, '/', sep = '')
   if(!dir.exists(run.dir)){ dir.create(run.dir) }
 
   # save out run parameters
-  save(run.params, file = paste(run.dir, 'run_params_', run, '.Rdata', sep = ''))
+  saveRDS(run.params, file = paste(run.dir, 'run_params_', run, '.rds', sep = ''))
 
   # also save out version of stan file for future reference
   file.copy(from = paste(predict.dir, 'ran_ef.stan', sep = ''),
@@ -76,12 +76,12 @@ setup.all = function(base.dir, run.dir, onestep = FALSE)
 
   # load in data and posterior draws of blood pressure model
   # theta h = blood pressure model, provided by previous analysis
-  dat = readRDS(paste0(data.dir, 'dat.RDS'))
-  covariate.cols = readRDS(paste0(data.dir, 'covariate_cols.RDS'))
+  dat = readRDS(paste0(data.dir, 'dat.rds'))
+  covariate.cols = readRDS(paste0(data.dir, 'covariate_cols.rds'))
 
   # copy over to run dir for saving
-  saveRDS(dat, paste0(run.dir, 'data.RDS'))
-  saveRDS(covariate.cols, paste0(run.dir, 'covariate_cols.RDS'))
+  saveRDS(dat, paste0(run.dir, 'data.rds'))
+  saveRDS(covariate.cols, paste0(run.dir, 'covariate_cols.rds'))
 
   if(!onestep)
   {
