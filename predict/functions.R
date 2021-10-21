@@ -130,7 +130,7 @@ get.theta.h.draws = function(theta.h.stan.dat, covariate.cols,
 
   if(run.params[['theta.h.fixed.init']])
   {
-    init.params = initialize.chains.theta.h()
+    init.params = initialize.chains.theta.h()[1:run.params[['mcmc.chains']]]
 
     fit = stan(
       file = paste0(base.dir, 'infer/state_space_adherence.stan'),
@@ -140,6 +140,7 @@ get.theta.h.draws = function(theta.h.stan.dat, covariate.cols,
       warmup = run.params[['theta.h.mcmc.length']]/2,
       chains = run.params[['mcmc.chains']]
     )
+
   } else
   {
     fit = stan(
@@ -311,7 +312,7 @@ initialize.chains.theta.h = function()
       'cor' = 0,
       'sigma_nu' = c(0.2, 0.2),
       'sigma_0' = c(0.2, 0.2),
-      'beta' = matrix(c(120, 80, 0, 0), nrow = 2, ncol = 2, byrow = TRUE)
+      'beta' = matrix(c(120, 80, 0, 0, 0, 0), nrow = 3, ncol = 2, byrow = TRUE)
     ),
     'chain2' = list(
       'rho' = c(0.5, 0.5),
@@ -320,7 +321,7 @@ initialize.chains.theta.h = function()
       'cor' = -0.5,
       'sigma_nu' = c(0.5, 0.5),
       'sigma_0' = c(0.5, 0.5),
-      'beta' = matrix(c(120, 80, 1, 1), nrow = 2, ncol = 2, byrow = TRUE)
+      'beta' = matrix(c(120, 80, 1, 1, 1, 1), nrow = 3, ncol = 2, byrow = TRUE)
     ),
     'chain3' = list(
       'rho' = c(0.8, 0.8),
@@ -329,7 +330,7 @@ initialize.chains.theta.h = function()
       'cor' = 0.5,
       'sigma_nu' = c(1, 1),
       'sigma_0' = c(1, 1),
-      'beta' = matrix(c(120, 80, -1, -1), nrow = 2, ncol = 2, byrow = TRUE)
+      'beta' = matrix(c(120, 80, -1, -1, -1, -1), nrow = 3, ncol = 2, byrow = TRUE)
     ),
     'chain4' = list(
       'rho' = c(0.2, 0.2),
@@ -338,7 +339,7 @@ initialize.chains.theta.h = function()
       'cor' = 0,
       'sigma_nu' = c(0.1, 0.1),
       'sigma_0' = c(2, 2),
-      'beta' = matrix(c(120, 80, 0.2, -3), nrow = 2, ncol = 2, byrow = TRUE)
+      'beta' = matrix(c(120, 80, 0.2, -3, -3, 0.2), nrow = 3, ncol = 2, byrow = TRUE)
     )
   )
 
