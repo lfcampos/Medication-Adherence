@@ -643,12 +643,12 @@ draw.c.star = function(datasets, theta, run.params, base.dir, cl = NULL)
 # one-step procedure
 #################################
 
-draw.c.star.onestep = function(datasets, run.params, base.dir, old.run.dir)
+draw.c.star.onestep = function(datasets, run.params, base.dir)
 {
   # read in previous data
-  if(!is.null(old.run.dir))
+  if(!is.null(run.params[['old.run.dir']]))
   {
-    draws = readRDS(paste0(base.dir, 'predict/out/', old.run.dir, '/draws_onestep.rds'))
+    draws = readRDS(paste0(base.dir, 'predict/out/', run.params[['old.run.dir']], '/draws_onestep.rds'))
     theta.row = unlist(draws$theta[,1])
   } else
   {
@@ -661,15 +661,9 @@ draw.c.star.onestep = function(datasets, run.params, base.dir, old.run.dir)
     theta.a = get.theta.a.draws(theta.a.stan.dat = datasets[['train']]$data.melt,
                                 covariate.cols, run.params, base.dir)
     gc()
-    if(run.params[['use.post.mean']])
-    {
-      theta = save.theta.means(theta.a, theta.h, run.params, delta.new = TRUE)
-      theta.row = unlist(theta)
-    } else
-    {
-      theta = save.theta.draws(theta.a, theta.h, run.params, delta.new = TRUE)
-      theta.row = unlist(theta[1,])
-    }
+
+    theta = save.theta.draws(theta.a, theta.h, run.params, delta.new = TRUE)
+    theta.row = unlist(theta[1,])
 
     remove(theta, theta.h, theta.a, covariate.cols)
     gc()

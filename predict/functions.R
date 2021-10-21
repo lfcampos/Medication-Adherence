@@ -222,55 +222,6 @@ save.theta.draws = function(theta.a, theta.h, run.params, delta.new = TRUE)
   return(params)
 }
 
-
-#################################
-# rearrange theta.a and theta.h params for convenience and readability
-# only select a subsample for final inference
-#################################
-
-save.theta.means = function(theta.a, theta.h, run.params, delta.new = TRUE)
-{
-  beta.s.rows = grep('beta.*,1.*', rownames(theta.h$post.means), value = TRUE)
-  beta.d.rows = grep('beta.*,2.*', rownames(theta.h$post.means), value = TRUE)
-
-  params.b = data.frame(
-    rho.s = theta.h$post.means['rho[1]', sample(1:3, 1)],
-    rho.d = theta.h$post.means['rho[2]', sample(1:3, 1)],
-    phi.s = theta.h$post.means['phi[1]', sample(1:3, 1)],
-    phi.d = theta.h$post.means['phi[2]', sample(1:3, 1)],
-    sigma.s.eps = theta.h$post.means['sigma[1]', sample(1:3, 1)],
-    sigma.d.eps = theta.h$post.means['sigma[2]', sample(1:3, 1)],
-    rho.eps = theta.h$post.means['cor', sample(1:3, 1)],
-    sigma.s.nu = theta.h$post.means['sigma_nu[1]', sample(1:3, 1)],
-    sigma.d.nu = theta.h$post.means['sigma_nu[2]', sample(1:3, 1)],
-    sigma.s.0 = theta.h$post.means['sigma_0[1]', sample(1:3, 1)],
-    sigma.d.0 = theta.h$post.means['sigma_0[2]', sample(1:3, 1)],
-    beta.s = t(theta.h$post.means[beta.s.rows, sample(1:3, 1)]),
-    beta.d = t(theta.h$post.means[beta.d.rows, sample(1:3, 1)])
-  )
-  rownames(params.b) = NULL
-
-  beta.rows = grep('beta.*', rownames(theta.a$post.means), value = TRUE)
-  delta.train.rows = grep('delta\\[.*', rownames(theta.a$post.means), value = TRUE)
-  delta.new.rows = grep('delta_new\\[.*', rownames(theta.a$post.means), value = TRUE)
-
-  params.a = data.frame(
-    beta.a = t(theta.a$post.means[beta.rows, sample(1:3, 1)]),
-    sigma.delta = theta.a$post.means['sigma_delta', sample(1:3, 1)],
-    delta.train = t(theta.a$post.means[delta.train.rows, sample(1:3, 1)])
-  )
-  rownames(params.a) = NULL
-
-  if(delta.new)
-  {
-    params.a$delta.new = t(theta.a$post.means[delta.new.rows, sample(1:3, 1)])
-  }
-
-  params = cbind(params.b, params.a)
-  names(params)[1:18] = names(theta.true.params)
-  return(params)
-}
-
 #################################
 # calculate quantiles for posterior adherence intervals
 #################################
@@ -393,7 +344,6 @@ initialize.chains.theta.h = function()
 
   return(init.params)
 }
-
 
 theta.true.params = c(
   'rho.s' = 0.8,

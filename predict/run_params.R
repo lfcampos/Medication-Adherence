@@ -17,33 +17,33 @@ run.params = NULL
 # for a quick code test, automatically runs a quick version, see below
 run.params[['test.code']] = FALSE
 # running in the cloud? if running locally, will not use all cores
-run.params[['cloud']] = FALSE
+run.params[['cloud']] = TRUE
 ########################################################################
 
 ########################################################################
 # number of iterations etc
 ########################################################################
-# use posterior mean
-run.params[['use.post.mean']] = TRUE
+# build off of a previous iteration?
+run.params[['old.run.dir']] = NULL
 # number of posterior samples from training model
 # corresponds to "f" in manuscript
-run.params[['npostsamp']] = 1
+run.params[['npostsamp']] = 100
 # number of patients to predict adherence for. We have
 # 503 total, and 400 are fixed in the training set
-run.params[['train.size']] = 20
-run.params[['test.size']] = 5
+run.params[['train.size']] = 70
+run.params[['test.size']] = 30
 # number of particles
 # 'P' in manuscript
-run.params[['nparticles']] = 8
+run.params[['nparticles']] = 32
 # number of particle filter iterations
 # corresponds to "e" in manuscript
-run.params[['npf']] = 2
+run.params[['npf']] = 100
 # particle filter burnin
 run.params[['burnin']] = round(run.params[['npf']]/5)
 # MCMC length
-run.params[['mcmc.chains']] = 2
-run.params[['theta.h.mcmc.length']] = 100
-run.params[['theta.a.mcmc.length']] = 100
+run.params[['mcmc.chains']] = 4
+run.params[['theta.h.mcmc.length']] = 8000
+run.params[['theta.a.mcmc.length']] = 8000
 run.params[['theta.h.fixed.init']] = TRUE
 ########################################################################
 
