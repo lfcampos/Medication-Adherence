@@ -15,12 +15,15 @@
 # run.type = 'onestep'
 # run.dates = '20211017_2207'
 # run.dates = '20211020_1344'
-run.dates = '20211021_1108'
-run.type = 'twostep'
-square.dots = TRUE
+# run.dates = '20211021_1108'
+# run.type = 'twostep'
+# square.dots = TRUE
+
+run.dates = c('20211015_1705')
+run.type = 'onestep'
+square.dots = FALSE
 
 # setup
-# base.dir = '/Users/khunter/Dropbox/archive/Medication-Adherence/'
 base.dir = '/Users/khunter/Dropbox/Medication-Adherence/'
 predict.dir = paste(base.dir, 'predict/', sep = '')
 
@@ -112,8 +115,9 @@ for(run.date in run.dates)
 {
   run.dir = paste(predict.dir, 'out/run_', run.date, '/', sep = '')
   # get params
-  load(paste(run.dir, 'run_params_', run.date, '.rds', sep = ''))
-
+  # run.params = readRDS(paste(run.dir, 'run_params_', run.date, '.rds', sep = ''))
+  load(paste(run.dir, 'run_params_', run.date, '.Rdata', sep = ''))
+  
   # read and concatenate in all the data
   draws = readRDS(file = paste0(run.dir, 'draws_', run.type, '.rds'))
   c.means = cbind(c.means, draws[['c.means']])
@@ -130,7 +134,7 @@ for(run.date in run.dates)
 }
 
 # only save out for latest run
-run.dir = run.dir = paste(predict.dir, 'out/run_', max(run.dates), '/', sep = '')
+run.dir = paste(predict.dir, 'out/run_', max(run.dates), '/', sep = '')
 
 # summarize
 interval.summary = summarize.adherence(run.dir, c.means, p.prior,
@@ -192,60 +196,3 @@ if(run.type == 'onestep')
       color = 'red') +
     facet_wrap(param ~ ., scales = 'free')
 }
-
-
-
-
-# # convergence
-# ess = draws[['ess']]
-# theta = draws[['theta']]
-# theta.a.rhat = draws[['theta.a.rhat']]
-# theta.h.rhat = draws[['theta.h.rhat']]
-#
-# # check diagnostics
-# rhat.target = 1.01
-#
-# sum(theta.a.rhat > rhat.target)
-# sum(theta.h.rhat > rhat.target)
-#
-# # produce table summary of adherence model
-# summarize.theta.a = function(theta.a, param_titles)
-# {
-#   fixef.summary = cbind(
-#     apply(theta.a$fixef, 2, mean),
-#     apply(theta.a$fixef, 2, quantile, probs = 0.025),
-#     apply(theta.a$fixef, 2, quantile, probs = 0.975)
-#   )
-#   ranef.sd.summary = c(mean(theta.a$ranef.sd), quantile(theta.a$ranef.sd, 0.025), quantile(theta.a$ranef.sd, 0.975))
-#   alpha.summary = c(mean(theta.a$alpha.new), quantile(theta.a$alpha.new, 0.025), quantile(theta.a$alpha.new, 0.975))
-#   theta_summary = data.frame(rbind(fixef.summary, ranef.sd.summary, alpha.summary))
-#   colnames(theta_summary) = c('mean', 'quantile1', 'quantile2')
-#   theta_summary$parameter = rownames(theta_summary)
-#
-#   if(!is.null(param_titles))
-#   {
-#     add.titles.query = "
-#     SELECT
-#       param_titles.nice AS parameter, theta_summary.mean,
-#       theta_summary.quantile1, theta_summary.quantile2
-#     FROM
-#       theta_summary
-#     LEFT JOIN
-#       param_titles ON theta_summary.parameter = param_titles.orig
-#     "
-#     theta_summary = sqldf(add.titles.query)
-#   }
-#   return(theta_summary)
-# }
-
-# load(paste0(run.dir, 'theta_a.RData'))
-# # maps out original variable names to "nice" ones you may want to print in a table
-# param_titles = data.frame(
-#   orig = c(
-#     'intercept', 'gender', 'ranef.sd.summary', 'alpha.summary'
-#   ),
-#   nice = c(
-#     'Intercept', 'Male', 'Random effect standard deviation', 'Alpha'
-#   ))
-# theta.a.summary = summarize.theta.a(theta.a, param_titles)
-# print(theta.a.summary)

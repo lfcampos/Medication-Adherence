@@ -105,6 +105,6 @@ ex <- extract(fit)
 # Save out data and STAN fit
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-saveRDS(ex, file = 'data/stan_fit.RDS')
+saveRDS(ex, file = 'data/stan_fit.rds')
 covariate.cols <- c('gender')
-saveRDS(covariate.cols, file = 'data/covariate_cols.RDS')
+saveRDS(covariate.cols, file = 'data/covariate_cols.rds')

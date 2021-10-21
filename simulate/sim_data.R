@@ -75,6 +75,6 @@ means = apply(c.all, 1, function(x){ sum(x == 1)/length(x) })
 hist(means)
 
 if(!dir.exists('data')) { dir.create('data') }
-saveRDS(dat, file = 'data/dat.RDS')
+saveRDS(dat, file = 'data/dat.rds')
 
-saveRDS(covariate.cols, file = 'data/covariate_cols.RDS')
+saveRDS(covariate.cols, file = 'data/covariate_cols.rds')
