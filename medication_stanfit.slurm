@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -n 4 													# Number of cores requested
 #SBATCH -N 1 													# Ensure that all cores are on one machine
-#SBATCH -t 600													# Runtime in minutes
+#SBATCH -t 1440													# Runtime in minutes
 #SBATCH -p shared												# Partition to submit to
-#SBATCH --mem-per-cpu=8000 										# Memory per cpu in MB (see also --mem-per-cpu)
+#SBATCH --mem-per-cpu=10000 										# Memory per cpu in MB (see also --mem-per-cpu)
 #SBATCH --open-mode=append
 #SBATCH -o /n/home01/khunter33/Medication-Adherence/log/%j.out 	# Standard out goes to this file
 #SBATCH -e /n/home01/khunter33/Medication-Adherence/log/%j.err 	# Standard err goes to this filehostname
